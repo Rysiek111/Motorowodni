@@ -26,6 +26,7 @@
             color: white;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
             backdrop-filter: blur(10px);
+            box-sizing: border-box;
         }
 
         h1 {
@@ -35,9 +36,10 @@
             letter-spacing: 1px;
         }
 
-        h3 {
-            margin-bottom: 20px;
+        h2 {
+            font-size: 22px;
             line-height: 1.4;
+            margin-bottom: 20px;
         }
 
         button {
@@ -53,11 +55,18 @@
             transition: all 0.2s ease;
         }
 
-        button:active {
+        button:disabled {
+            background: #1e293b;
+            color: #64748b;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        button:active:not(:disabled) {
             transform: scale(0.97);
         }
 
-        button:hover {
+        button:hover:not(:disabled) {
             background: #38bdf8;
             color: #020617;
             transform: translateY(-2px);
@@ -65,42 +74,46 @@
 
         .input-label {
             display: block;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             color: #94a3b8;
-            font-size: 13px;
+            font-size: 14px;
         }
 
         .input-wrapper {
             display: flex;
             align-items: center;
-            background: #f1f5f9;
-            border: 1px solid #38bdf8;
+            background: #f8fafc;
+            border: 2px solid #334155;
             border-radius: 10px;
-            padding: 12px;
-            transition: 0.2s;
+            padding: 4px 12px;
+            transition: all 0.2s ease;
+            margin-bottom: 5px;
         }
 
         .input-wrapper:focus-within {
+            border-color: #38bdf8;
             box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.3);
             transform: scale(1.01);
         }
 
         .icon {
-            margin-right: 8px;
-            color: #0f172a;
+            margin-right: 10px;
+            font-size: 18px;
+            user-select: none;
         }
 
         input {
             width: 100%;
-            box-sizing: border-box;
-            padding: 14px;
-            border-radius: 10px;
-            border: 1px solid #38bdf8;
-            margin-bottom: 15px;
-            background: #f8fafc;
+            border: none;
+            background: transparent;
             color: #0f172a;
-            font-size: 15px;
-            transition: all 0.2s ease;
+            font-size: 16px;
+            padding: 10px 0;
+            font-family: inherit;
+        }
+
+        input:focus {
+            outline: none;
         }
 
         input::placeholder {
@@ -109,36 +122,35 @@
 
         .error {
             margin-top: 6px;
-            font-size: 12px;
+            font-size: 13px;
             color: #f87171;
-            min-height: 16px;
-        }
-
-        input:focus {
-            outline: none;
-            border: 1px solid #0ea5e9;
-            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.3);
-            transform: scale(1.01);
-        }
-
-        .bar {
-            height: 18px;
-            background: linear-gradient(90deg, #38bdf8, #0ea5e9);
-            border-radius: 6px;
-            margin-bottom: 10px;
+            min-height: 20px;
+            font-weight: 500;
         }
 
         .progress {
             height: 6px;
             background: #1e293b;
             border-radius: 10px;
-            margin-bottom: 15px;
+            margin-bottom: 25px;
             overflow: hidden;
         }
 
         .progress-inner {
             height: 100%;
             background: #38bdf8;
+            transition: width 0.3s ease;
+        }
+
+        .question-img {
+            display: block;
+            max-width: 180px;
+            max-height: 180px;
+            width: auto;
+            height: auto;
+            margin: 0 auto 20px auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
 
         .fade {
@@ -150,7 +162,6 @@
                 opacity: 0;
                 transform: translateY(8px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -158,7 +169,7 @@
         }
 
         .fade-in {
-            animation: fadeInUp 0.5s ease;
+            animation: fadeInUp 0.5s ease both;
         }
 
         @keyframes fadeInUp {
@@ -166,67 +177,10 @@
                 opacity: 0;
                 transform: translateY(15px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
-        }
-
-        .end {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            animation: fadeIn 0.4s ease;
-        }
-
-        .end-card {
-            background: #1e293b;
-            padding: 30px;
-            border-radius: 16px;
-            width: 100%;
-            max-width: 420px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-        }
-
-        .check {
-            width: 70px;
-            height: 70px;
-            margin: 0 auto 15px;
-            border-radius: 50%;
-            background: #38bdf8;
-            color: #0f172a;
-            font-size: 32px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            animation: pop 0.4s ease;
-        }
-
-        @keyframes pop {
-            0% {
-                transform: scale(0);
-            }
-
-            80% {
-                transform: scale(1.2);
-            }
-
-            100% {
-                transform: scale(1);
-            }
-        }
-
-        .end h2 {
-            margin: 10px 0;
-            color: #38bdf8;
-        }
-
-        .end p {
-            color: #cbd5e1;
-            margin-bottom: 15px;
         }
     </style>
 </head>
@@ -238,10 +192,9 @@
     </div>
 
     <script type="module">
-
-        // 🔥 FIREBASE (TU WKLEJ SWOJE DANE)
+        // 🔥 FIREBASE
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getFirestore, addDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getFirestore, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC_c5yD2XF-mbCK1NGLYMdIk7UVKGsLxoU",
@@ -254,239 +207,139 @@
 
         // 📌 PYTANIA
         let pytania = [
-        {
+            {
                 "tresc": "Podczas holowania narciarz podniósł kciuk do góry, oznacza to:",
-                "odp": [
-                        "Jedź do domu",
-                        "Zwiększ prędkość",
-                        "Wszystko w porządku"
-                ],
+                "odp": ["Jedź do domu", "Zwiększ prędkość", "Wszystko w porządku"],
                 "poprawna": 1
-        },
-        {
+            },
+            {
                 "tresc": "Holowany narciarz widzi wyciągniętą poziomo rękę obserwatora z lewej burty, oznacza to:",
-                "odp": [
-                        "Trzymaj się lewej burty",
-                        "Zmniejszamy prędkość",
-                        "Łódź skręca w lewo"
-                ],
+                "odp": ["Trzymaj się lewej burty", "Zmniejszamy prędkość", "Łódź skręca w lewo"],
                 "poprawna": 0
-        },
-        {
+            },
+            {
                 "tresc": "W jaki sposób zakończysz jazdę holowanego?",
-                "odp": [
-                        "Przez wolne wytracanie prędkości",
-                        "Przez zdecydowane zdjęcie obrotów manetką",
-                        "Przez gwałtowny zwrot"
-                ],
+                "odp": ["Przez wolne wytracanie prędkości", "Przez zdecydowane zdjęcie obrotów manetką", "Przez gwałturny zwrot"],
                 "poprawna": 0
-        },
-        {
+            },
+            {
                 "tresc": "W jaki sposób narciarz lub inny holowany na obiekcie nawodnym sygnalizuje powrót do bazy?",
-                "odp": [
-                        "Porusza dłonią uniesioną nad głową",
-                        "Kciukiem ręki skierowanym w dół",
-                        "Wskazuje wyciągniętą rękę w kierunku bazy"
-                ],
+                "odp": ["Porusza dłonią uniesioną nad głową", "Kciukiem ręki skierowanym w dół", "Wskazuje wyciągniętą rękę w kierunku bazy"],
                 "poprawna": 0
-        },
-        {
+            },
+            {
                 "tresc": "Holowany narciarz lub inny holowany na obiektach nawodnych po wywrotce uniósł złączone ręce w górę, oznacza to:",
-                "odp": [
-                        "Potrzebuję pomocy",
-                        "Uwaga, niebezpieczeństwo zafalowania",
-                        "Chcę kontynuować jazdę"
-                ],
+                "odp": ["Potrzebuję pomocy", "Uwaga, niebezpieczeństwo zafalowania", "Chcę kontynuować jazdę"],
                 "poprawna": 2
-        },
-        {
+            },
+            {
                 "tresc": "Z jaką prędkością należy holować narciarza?",
-                "odp": [
-                        "30km/godz.",
-                        "40km/godz.",
-                        "W zależności od umiejętności i kondycji narciarza"
-                ],
+                "odp": ["30km/godz.", "40km/godz.", "W zależności od umiejętności i kondycji narciarza"],
                 "poprawna": 2
-        },
-        {
+            },
+            {
                 "tresc": "Człowiek znajdujący się w wodzie o temperaturze 10°C może przeżyć:",
-                "odp": [
-                        "12 godzin",
-                        "6 godzin",
-                        "2-3 godzin"
-                ],
+                "odp": ["12 godzin", "6 godzin", "2-3 godzin"],
                 "poprawna": 2
-        },
-        {
+            },
+            {
                 "tresc": "Jaka jest przyczyna upadku holowanego narciarza na plecy?",
-                "odp": [
-                        "Za szybka jazda",
-                        "Wyprostowane kolana",
-                        "Za wysoko uniesiony drążek holowniczy"
-                ],
+                "odp": ["Za szybka jazda", "Wyprostowane kolana", "Za wysoko uniesiony drążek holowniczy"],
                 "poprawna": 2
-        },
-        {
+            },
+            {
                 "tresc": "Podczas startu narciarza z wody powinien on trzymać ręce:",
-                "odp": [
-                        "Wyprostowane",
-                        "Zgięte w łokciach pod kątem prostym",
-                        "Zgięte w łokciach i dociągnięte do klatki piersiowej"
-                ],
+                "odp": ["Wyprostowane", "Zgięte w łokciach pod kątem prostym", "Zgięte w łokciach i dociągnięte do klatki piersiowej"],
                 "poprawna": 2
-        },
-        {
+            },
+            {
                 "tresc": "Co oznacza przedstawiony znak?",
-                "odp": [
-                        "Zezwolenie na uprawianie narciarstwa wodnego oraz holowanie statków powietrznych za statkiem",
-                        "Akwen wyłącznie do uprawiania narciarstwa wodnego oraz holowania statków powietrznych za statkiem",
-                        "Zakaz holowania narciarzy wodnych"
-                ],
+                "obrazek": "znak_narciarstwo.png",
+                "odp": ["Zezwolenie na uprawianie narciarstwa wodnego oraz holowanie statków powietrznych za statkiem", "Akwen wyłącznie do uprawiania narciarstwa wodnego oraz holowania statków powietrznych za statkiem", "Zakaz holowania narciarzy wodnych"],
                 "poprawna": 0
-        },
-        {
+            },
+            {
                 "tresc": "Co oznacza gwałtowne podnoszenie i opuszczanie ręki przez sternika?",
-                "odp": [
-                        "Puść linę",
-                        "Trzymaj się w kilwaterze",
-                        "Uważaj, zwalniamy prędkość"
-                ],
+                "odp": ["Puść linę", "Trzymaj się w kilwaterze", "Uważaj, zwalniamy prędkość"],
                 "poprawna": 0
-        },
-        {
+            },
+            {
                 "tresc": "Co oznacza uniesienie ręki sternika w górę?",
-                "odp": [
-                        "Sternik informuje holowanego – powrót do domu",
-                        "Sternik informuje holowanego – uwaga niebezpieczeństwo, zostań w śladzie łodzi",
-                        "Koniec pływania – odrzuć drążek"
-                ],
+                "odp": ["Sternik informuje holowanego – powrót do domu", "Sternik informuje holowanego – uwaga niebezpieczeństwo, zostań w śladzie łodzi", "Koniec pływania – odrzuć drążek"],
                 "poprawna": 0
-        },
-        {
+            },
+            {
                 "tresc": "Wskazana szerokość drążka holującego to:",
-                "odp": [
-                        "15-24 cm",
-                        "24-36 cm",
-                        "37-55 cm"
-                ],
+                "odp": ["15-24 cm", "24-36 cm", "37-55 cm"],
                 "poprawna": 1
-        },
-        {
+            },
+            {
                 "tresc": "Lina holownicza powinna być:",
-                "odp": [
-                        "Tonąca",
-                        "Pływająca",
-                        "Rozcinająca"
-                ],
+                "odp": ["Tonąca", "Pływająca", "Rozcinająca"],
                 "poprawna": 1
-        },
-        {
+            },
+            {
                 "tresc": "Rozpoczęcie holowania banana, koła lub innych dmuchawców powinno się zacząć:",
-                "odp": [
-                        "Przy luźnej linie holowniczej",
-                        "Przy linie częściowo sklarowanej",
-                        "Przy linie naprężonej"
-                ],
+                "odp": ["Przy luźnej linie holowniczej", "Przy linie częściowo sklarowanej", "Przy linie naprężonej"],
                 "poprawna": 2
-        },
-        {
+            },
+            {
                 "tresc": "Kto jest prawnie odpowiedzialny za wypadek podczas holowania narciarza lub innych obiektów pływających?",
-                "odp": [
-                        "Obserwator razem z narciarzem",
-                        "Sternik",
-                        "Sternik razem z obserwatorem"
-                ],
+                "odp": ["Obserwator razem z narciarzem", "Sternik", "Sternik razem z obserwatorem"],
                 "poprawna": 1
-        },
-        {
+            },
+            {
                 "tresc": "Jaka musi być minimalna szerokość akwenu z bezpieczną wodą do holowania narciarza lub innych obiektów pływających?",
-                "odp": [
-                        "30 metrów",
-                        "60 metrów",
-                        "50 metrów"
-                ],
+                "odp": ["30 metrów", "60 metrów", "50 metrów"],
                 "poprawna": 2
-        },
-        {
+            },
+            {
                 "tresc": "Kto może prowadzić jednostkę podczas holowania?",
-                "odp": [
-                        "Posiadające patent minimum sternika motorowodnego i ukończone 14 lat",
-                        "Posiadające patent minimum sternika motorowodnego i ukończone 16 lat",
-                        "Posiadające patent minimum sternika motorowodnego i ukończone 18 lat"
-                ],
+                "odp": ["Posiadające patent minimum sternika motorowodnego i ukończone 14 lat", "Posiadające patent minimum sternika motorowodnego i ukończone 16 lat", "Posiadające patent minimum sternika motorowodnego i ukończone 18 lat"],
                 "poprawna": 1
-        },
-        {
+            },
+            {
                 "tresc": "Przyczyna upadku narciarza na twarz to:",
-                "odp": [
-                        "Za szybka jazda",
-                        "Złamanie w pasie",
-                        "Za wysoko trzymany hol"
-                ],
+                "odp": ["Za szybka jazda", "Złamanie w pasie", "Za wysoko trzymany hol"],
                 "poprawna": 0
-        },
-        {
+            },
+            {
                 "tresc": "Z jaką prędkością holujemy dmuchawca?",
-                "odp": [
-                        "50km/h",
-                        "40km/h",
-                        "Bezpieczną, określoną przez producenta"
-                ],
+                "odp": ["50km/h", "40km/h", "Bezpieczną, określoną przez producenta"],
                 "poprawna": 2
-        },
-        {
+            },
+            {
                 "tresc": "Holowanie narciarza i innych obiektów pływających po zmroku jest:",
-                "odp": [
-                        "Dozwolone przy dodatkowym oświetleniu łodzi",
-                        "Dozwolone przy dodatkowym oświetleniu łodzi umieszczonym na rufie",
-                        "Bezwzględnie zabronione"
-                ],
+                "odp": ["Dozwolone przy dodatkowym oświetleniu łodzi", "Dozwolone przy dodatkowym oświetleniu łodzi umieszczonym na rufie", "Bezwzględnie zabronione"],
                 "poprawna": 2
-        },
-        {
+            },
+            {
                 "tresc": "Wskazana średnica drążka holowniczego to:",
-                "odp": [
-                        "1,3cm – 1,8cm",
-                        "1,7cm – 2,2cm",
-                        "2,5cm – 2,8cm"
-                ],
+                "odp": ["1,3cm – 1,8cm", "1,7cm – 2,2cm", "2,5cm – 2,8cm"],
                 "poprawna": 2
-        },
-        {
+            },
+            {
                 "tresc": "Minimalna szerokość akwenu z bezpieczną wodą w miejscu zawracania łodzi z holowanym narciarzem lub innym obiektem pływającym musi wynosić:",
-                "odp": [
-                        "100 metrów",
-                        "150 metrów",
-                        "200 metrów"
-                ],
+                "odp": ["100 metrów", "150 metrów", "200 metrów"],
                 "poprawna": 1
-        },
-        {
+            },
+            {
                 "tresc": "Kiedy holowany narciarz musi mieć założony kapok lub inny środek asekuracyjny?",
-                "odp": [
-                        "Przy złej pogodzie",
-                        "Zawsze",
-                        "W zależności od umiejętności"
-                ],
+                "odp": ["Przy złej pogodzie", "Zawsze", "W zależności od umiejętności"],
                 "poprawna": 1
-        },
-        {
+            },
+            {
                 "tresc": "Jaką jednostką holowanie narciarza jest zabronione?",
-                "odp": [
-                        "Jednostką sterowaną rumplem",
-                        "Jednostką sterowaną kołem sterowym",
-                        "Skuterem wodnym"
-                ],
+                "odp": ["Jednostką sterowaną rumplem", "Jednostką sterowanego kołem sterowym", "Skuterem wodnym"],
                 "poprawna": 0
-        }
-];
+            }
+        ];
 
         let wybory = [];
         let poprawne = 0;
         let index = 0;
         let nick = "";
 
-        // 🎲 shuffle
         function shuffle(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -494,17 +347,14 @@
             }
         }
 
-        // 🧭 menu
         function menu() {
-            appDiv.innerHTML = `
-        <button onclick="start()">Start</button>
-    `;
+            appDiv.innerHTML = `<button onclick="start()">Start</button>`;
         }
 
         document.addEventListener("keypress", function (e) {
             if (e.key === "Enter") {
-                const input = document.getElementById("nickInput");
-                if (input) startQuiz();
+                const btn = document.getElementById("startBtn");
+                if (btn && !btn.disabled) startQuiz();
             }
         });
 
@@ -519,45 +369,40 @@
 
             if (value.length < 3) {
                 error.textContent = "Nick musi mieć min. 3 znaki";
+                error.style.color = "#f87171";
                 btn.disabled = true;
-            }
-            else if (value.length > 15) {
+            } else if (value.length > 15) {
                 error.textContent = "Nick za długi (max 15 znaków)";
+                error.style.color = "#f87171";
                 btn.disabled = true;
-            }
-            else {
+            } else {
                 error.textContent = "OK ✓";
                 error.style.color = "#34d399";
                 btn.disabled = false;
             }
         }
 
-        // ▶️ start
         window.start = function () {
             appDiv.innerHTML = `
-        <div class="fade-in">
-            <label class="input-label">Nick</label>
-
-            <div class="input-wrapper">
-                <span class="icon">👤</span>
-                <input id="nickInput" placeholder="Nick" oninput="validateNick()">
-            </div>
-
-            <div id="nickError" class="error"></div>
-        </div>
-
-        <div class="fade-in" style="animation-delay:0.15s">
-            <button id="startBtn" onclick="startQuiz()" disabled>Rozpocznij</button>
-        </div>
-    `;
+                <div class="fade-in">
+                    <label class="input-label">Nick gracza</label>
+                    <div class="input-wrapper">
+                        <span class="icon">👤</span>
+                        <input id="nickInput" placeholder="Wpisz swój nick..." oninput="validateNick()" autocomplete="off">
+                    </div>
+                    <div id="nickError" class="error"></div>
+                </div>
+                <div class="fade-in" style="animation-delay:0.1s">
+                    <button id="startBtn" onclick="startQuiz()" disabled>Rozpocznij Quiz</button>
+                </div>
+            `;
         }
 
-        // 🎮 quiz
         window.startQuiz = function () {
-            nick = document.getElementById("nickInput").value.trim();
+            const input = document.getElementById("nickInput");
+            nick = input ? input.value.trim() : "";
 
-            if (nick.length < 3) {
-                alert("Nick jest za krótki!");
+            if (nick.length < 3 || nick.length > 15) {
                 return;
             }
 
@@ -565,67 +410,59 @@
             index = 0;
             wybory = [];
             poprawne = 0;
-            pytania.forEach(p => { p.odpowiedziLosowe = [...p.odp].map((x,i)=>({tekst:x, idx:i})); shuffle(p.odpowiedziLosowe); });
+            pytania.forEach(p => { 
+                p.odpowiedziLosowe = [...p.odp].map((x, i) => ({ tekst: x, idx: i })); 
+                shuffle(p.odpowiedziLosowe); 
+            });
             pokazPytanie();
         }
 
         function pokazPytanie() {
-
-            // 🚨 KONIEC QUIZU
             if (index >= pytania.length) {
-
                 appDiv.innerHTML = `
-            <div class="progress">
-                <div class="progress-inner" style="width:100%"></div>
-            </div>
-
-            <h2 class="fade" style="text-align:center;">
-                Dziękuję za odpowiedzi!
-            </h2>
-        `;
-
+                    <div class="progress">
+                        <div class="progress-inner" style="width:100%"></div>
+                    </div>
+                    <h2 class="fade" style="text-align:center;">
+                        Dziękuję za odpowiedzi! Trwa zapisywanie wyniku...
+                    </h2>
+                `;
                 zapiszWybor();
                 return;
             }
 
-            // 📌 aktualne pytanie
             let p = pytania[index];
-
-            // 📊 progress (ILE JUŻ ZROBIONE)
             let progress = (index / pytania.length) * 100;
-
-            // 🔀 mieszanie odpowiedzi
             let idx = p.odpowiedziLosowe;
 
-            // 🎨 HTML pytania
             let html = `
-        <div class="progress">
-            <div class="progress-inner" style="width:${progress}%"></div>
-        </div>
+                <div class="progress">
+                    <div class="progress-inner" style="width:${progress}%"></div>
+                </div>
+                <h2 class="fade">
+                    Pytanie ${index + 1} z ${pytania.length}<br><br>
+                    ${p.tresc}
+                </h2>
+            `;
 
-        <h2 class="fade">
-            ${index + 1}/${pytania.length}<br>
-            ${p.tresc}
-        </h2>
-    `;
+            // Jeśli pytanie posiada obrazek, dodaj go do widoku
+            if (p.obrazek) {
+                html += `<img src="${p.obrazek}" alt="Znak pomocniczy" class="question-img fade">`;
+            }
 
-            // 🟦 odpowiedzi
             idx.forEach((i) => {
                 html += `
-            <button class="fade" onclick="wybierz(${i.idx})">
-                ${i.tekst}
-            </button>
-        `;
+                    <button class="fade" onclick="wybierz(${i.idx})">
+                        ${i.tekst}
+                    </button>
+                `;
             });
 
-            // 📤 render
             appDiv.innerHTML = html;
         }
 
-        // 📌 wybór
         window.wybierz = function (i) {
             let p = pytania[index];
-
             const czyPoprawna = i === p.poprawna;
             if (czyPoprawna) poprawne++;
 
@@ -641,10 +478,8 @@
             pokazPytanie();
         }
 
-        // 💾 zapis do FIREBASE
         async function zapiszWybor() {
             try {
-
                 await addDoc(collection(db, "wyniki"), {
                     gracz: nick,
                     wybory: wybory,
@@ -654,22 +489,24 @@
                 });
 
                 appDiv.innerHTML = `
-            <h2 style="text-align:center;" class="fade">
-                Twój wynik: ${poprawne}/${pytania.length}<br>
-                Wynik procentowy: ${Math.round((poprawne / pytania.length) * 100)}%
-            </h2>
-        `;
-
+                    <div style="text-align:center;" class="fade">
+                        <h2>Test zakończony!</h2>
+                        <p style="font-size: 18px; color: #cbd5e1;"><strong>${nick}</strong></p>
+                        <h2 style="color: #38bdf8; margin-top: 10px;">
+                            Twój wynik: ${poprawne} / ${pytania.length}<br>
+                            Procent: ${Math.round((poprawne / pytania.length) * 100)}%
+                        </h2>
+                        <button onclick="start()" style="margin-top: 20px; max-width: 200px;">Rozwiąż ponownie</button>
+                    </div>
+                `;
             } catch (e) {
-                console.log(e);
-                alert("Błąd zapisu!");
+                console.error(e);
+                alert("Błąd zapisu do bazy danych!");
             }
         }
 
-        // init
         const appDiv = document.getElementById("app");
         menu();
-
     </script>
 </body>
 
