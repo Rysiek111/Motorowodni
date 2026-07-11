@@ -78,11 +78,6 @@
         <div id="profile">Kliknij kandydata</div>
     </div>
 
-    <div class="section">
-        <h2>📊 Statystyki odpowiedzi</h2>
-        <div id="stats">Brak danych</div>
-    </div>
-
     <script type="module">
 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -103,7 +98,6 @@
         async function load() {
             const snap = await getDocs(collection(db, "wyniki"));
             
-            // Poprawka: zapobiegamy wielokrotnemu dodawaniu tego samego listenera przy ponownym ładowaniu
             document.getElementById("search").removeEventListener("input", renderUsers);
             document.getElementById("search").addEventListener("input", renderUsers);
 
@@ -120,7 +114,6 @@
 
             renderDashboard();
             renderUsers();
-            renderStats();
         }
 
         function renderDashboard() {
@@ -148,7 +141,6 @@
                         date = new Date(u.data.seconds * 1000).toLocaleString();
                     }
 
-                    // POPRAWKA: Przekazujemy string ID 'u.id' zamiast zmiennego indeksu 'i'
                     html += `
                         <div class="card">
                             <b>${u.gracz}</b><br>
@@ -162,7 +154,6 @@
             document.getElementById("users").innerHTML = html;
         }
 
-        // POPRAPWKA: Szukanie po unikalnym ID dokumentu z Firebase
         window.showProfile = function (id) {
             let u = allData.find(user => user.id === id);
             if (!u) return;
@@ -180,7 +171,6 @@
             document.getElementById("profile").innerHTML = html;
         }
 
-        // POPRAWKA: Usunięcie za pomocą unikalnego ID dokumentu z Firebase
         window.deleteUser = async function (id) {
             if (!confirm("Usunąć tego kandydata?")) return;
 
@@ -191,34 +181,6 @@
                 console.error("Błąd podczas usuwania użytkownika:", error);
                 alert("Nie udało się usunąć kandydata.");
             }
-        }
-
-        function renderStats() {
-            let stats = {};
-
-            allData.forEach(user => {
-                if (user.wybory && Array.isArray(user.wybory)) {
-                    user.wybory.forEach(w => {
-                        if (!stats[w.pytanie]) stats[w.pytanie] = {};
-                        if (!stats[w.pytanie][w.odpowiedz]) stats[w.pytanie][w.odpowiedz] = 0;
-
-                        stats[w.pytanie][w.odpowiedz]++;
-                    });
-                }
-            });
-
-            let html = "";
-
-            for (let q in stats) {
-                html += `<h4>${q}</h4>`;
-                for (let a in stats[q]) {
-                    html += `<p>${a} → ${stats[q][a]}x</p>`;
-                }
-                html += "<hr>";
-            }
-
-            // Zabezpieczenie na wypadek braku jakichkolwiek statystyk
-            document.getElementById("stats").innerHTML = html || "Brak danych do wyświetlenia.";
         }
 
         load();
