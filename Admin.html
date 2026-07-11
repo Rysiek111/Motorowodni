@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Panel Kontrolny</title>
+    <title>Recruiter Dashboard</title>
     <link rel="icon" type="image/x-icon" href="icon.ico">
 
     <style>
@@ -52,6 +52,17 @@
         .card {
             padding: 10px;
             border-bottom: 1px solid #334155;
+        }
+
+        /* Styl dla wyróżnienia wyników kandydata */
+        .score-badge {
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-left: 5px;
+            display: inline-block;
         }
     </style>
 </head>
@@ -141,9 +152,28 @@
                         date = new Date(u.data.seconds * 1000).toLocaleString();
                     }
 
+                    let wynikProcent = u.procent !== undefined ? u.procent + "%" : "-";
+                    let wynikPoprawne = u.poprawne !== undefined ? u.poprawne : null;
+                    let wyswietlanePoprawne = wynikPoprawne !== null ? wynikPoprawne : "-";
+
+                    // --- DYNAMICZNY KOLOR NA BAZIE PUNTKÓW ---
+                    let kolorBadge = "#64748b"; // Domyślny szary, gdy brak danych o punktach
+
+                    if (wynikPoprawne !== null) {
+                        if (wynikPoprawne >= 20) {
+                            kolorBadge = "#10b981"; // Zielony od 20 punktów
+                        } else {
+                            kolorBadge = "#ef4444"; // Czerwony poniżej 20 punktów
+                        }
+                    }
+                    // ----------------------------------------
+
                     html += `
                         <div class="card">
-                            <b>${u.gracz}</b><br>
+                            <b>${u.gracz}</b> 
+                            <span class="score-badge" style="background-color: ${kolorBadge};">
+                                ${wynikProcent} (${wyswietlanePoprawne} popr.)
+                            </span><br>
                             <small>${date}</small><br><br>
                             <button onclick="showProfile('${u.id}')">Profil</button>
                             <button class="delete" onclick="deleteUser('${u.id}')">Usuń</button>
@@ -158,14 +188,21 @@
             let u = allData.find(user => user.id === id);
             if (!u) return;
 
+            let wynikProcent = u.procent !== undefined ? u.procent + "%" : "-";
+            let wynikPoprawne = u.poprawne !== undefined ? u.poprawne : "-";
+
             let html = `<h3>${u.gracz}</h3>`;
+            html += `<p><b>Wynik ogólny:</b> ${wynikProcent} (Poprawne odpowiedzi: ${wynikPoprawne})</p><hr>`;
 
             if (u.wybory && Array.isArray(u.wybory)) {
                 u.wybory.forEach((w, j) => {
-                    html += `<p>${j + 1}. ${w.pytanie}<br><b>${w.odpowiedz}</b></p>`;
+                    let identyfikatorPytania = w.pytanie || (w.NumerPytania !== undefined ? `Pytanie nr ${w.NumerPytania}` : `Pytanie ${j + 1}`);
+                    let tekstOdpowiedzi = w.odpowiedz || w.odpowiedzKandydata || "Brak odpowiedzi";
+
+                    html += `<p>${j + 1}. ${identyfikatorPytania}<br><b>${tekstOdpowiedzi}</b></p>`;
                 });
             } else {
-                html += `<p>Brak zapisanych odpowiedzi dla tego kandydata.</p>`;
+                html += `<p>Brak szczegółowych odpowiedzi dla tego kandydata.</p>`;
             }
 
             document.getElementById("profile").innerHTML = html;
