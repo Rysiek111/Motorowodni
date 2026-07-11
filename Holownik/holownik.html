@@ -445,7 +445,6 @@
                 </h2>
             `;
 
-            // Jeśli pytanie posiada obrazek, dodaj go do widoku
             if (p.obrazek) {
                 html += `<img src="${p.obrazek}" alt="Znak pomocniczy" class="question-img fade">`;
             }
@@ -488,17 +487,42 @@
                     data: new Date()
                 });
 
+                // Budowanie listy z podsumowaniem i oznaczeniem błędów
+                let podsumowanieSzczegolowe = "";
+                wybory.forEach((w) => {
+                    podsumowanieSzczegolowe += `
+                        <div style="text-align: left; background: #334155; padding: 15px; border-radius: 8px; margin-bottom: 12px; border-left: 5px solid ${w.wynik ? '#34d399' : '#f87171'}">
+                            <p style="margin: 0 0 8px 0; font-weight: bold; font-size: 15px;">Pytanie ${w.NumerPytania}: ${w.pytanie}</p>
+                            <p style="margin: 4px 0; font-size: 14px; color: ${w.wynik ? '#34d399' : '#f87171'}">
+                                <strong>Twoja odpowiedź:</strong> ${w.odpowiedz} ${w.wynik ? '✓' : '✗'}
+                            </p>
+                            ${!w.wynik ? `<p style="margin: 4px 0; font-size: 14px; color: #34d399"><strong>Poprawna odpowiedź:</strong> ${w.poprawna}</p>` : ''}
+                        </div>
+                    `;
+                });
+
                 appDiv.innerHTML = `
                     <div style="text-align:center;" class="fade">
                         <h2>Test zakończony!</h2>
                         <p style="font-size: 18px; color: #cbd5e1;"><strong>${nick}</strong></p>
-                        <h2 style="color: #38bdf8; margin-top: 10px;">
+                        <h2 style="color: #38bdf8; margin-top: 10px; margin-bottom: 25px;">
                             Twój wynik: ${poprawne} / ${pytania.length}<br>
                             Procent: ${Math.round((poprawne / pytania.length) * 100)}%
                         </h2>
-                        <button onclick="start()" style="margin-top: 20px; max-width: 200px;">Rozwiąż ponownie</button>
+                        
+                        <div style="max-height: 400px; overflow-y: auto; margin-bottom: 20px; padding-right: 5px;">
+                            ${podsumowanieSzczegolowe}
+                        </div>
+
+                        <button onclick="start()" style="margin-top: 10px; max-width: 200px;">Rozwiąż ponownie</button>
                     </div>
                 `;
+
+                // Dostosowanie wysokości okna jeśli ekran jest zbyt mały na przewijaną listę
+                if(window.innerHeight < 800) {
+                    document.body.style.height = "auto";
+                    document.body.style.padding = "20px 0";
+                }
             } catch (e) {
                 console.error(e);
                 alert("Błąd zapisu do bazy danych!");
