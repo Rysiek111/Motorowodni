@@ -78,7 +78,10 @@
         <div id="profile">Kliknij kandydata</div>
     </div>
 
-    
+    <div class="section">
+        <h2>📊 Statystyki odpowiedzi</h2>
+        <div id="stats">Brak danych</div>
+    </div>
 
     <script type="module">
 
@@ -98,8 +101,10 @@
         let allData = [];
 
         async function load() {
-
             const snap = await getDocs(collection(db, "wyniki"));
+            
+            // Poprawka: zapobiegamy wielokrotnemu dodawaniu tego samego listenera przy ponownym ładowaniu
+            document.getElementById("search").removeEventListener("input", renderUsers);
             document.getElementById("search").addEventListener("input", renderUsers);
 
             allData = [];
@@ -119,7 +124,6 @@
         }
 
         function renderDashboard() {
-
             document.getElementById("count").innerText = allData.length;
 
             let today = new Date().toDateString();
@@ -133,26 +137,24 @@
         }
 
         function renderUsers() {
-
             let query = document.getElementById("search")?.value?.toLowerCase() || "";
-
             let html = "";
 
             allData
-                .filter(u => u.gracz.toLowerCase().includes(query))
-                .forEach((u, i) => {
-
+                .filter(u => u.gracz && u.gracz.toLowerCase().includes(query))
+                .forEach((u) => {
                     let date = "";
                     if (u.data?.seconds) {
                         date = new Date(u.data.seconds * 1000).toLocaleString();
                     }
 
+                    // POPRAWKA: Przekazujemy string ID 'u.id' zamiast zmiennego indeksu 'i'
                     html += `
                         <div class="card">
                             <b>${u.gracz}</b><br>
                             <small>${date}</small><br><br>
-                            <button onclick="showProfile(${i})">Profil</button>
-                            <button class="delete" onclick="deleteUser(${i})">Usuń</button>
+                            <button onclick="showProfile('${u.id}')">Profil</button>
+                            <button class="delete" onclick="deleteUser('${u.id}')">Usuń</button>
                         </div>
                     `;
                 });
@@ -160,58 +162,63 @@
             document.getElementById("users").innerHTML = html;
         }
 
-        window.showProfile = function (i) {
-
-            let u = allData[i];
+        // POPRAPWKA: Szukanie po unikalnym ID dokumentu z Firebase
+        window.showProfile = function (id) {
+            let u = allData.find(user => user.id === id);
+            if (!u) return;
 
             let html = `<h3>${u.gracz}</h3>`;
 
-            u.wybory.forEach((w, j) => {
-                html += `<p>${j + 1}. ${w.pytanie}<br><b>${w.odpowiedz}</b></p>`;
-            });
+            if (u.wybory && Array.isArray(u.wybory)) {
+                u.wybory.forEach((w, j) => {
+                    html += `<p>${j + 1}. ${w.pytanie}<br><b>${w.odpowiedz}</b></p>`;
+                });
+            } else {
+                html += `<p>Brak zapisanych odpowiedzi dla tego kandydata.</p>`;
+            }
 
             document.getElementById("profile").innerHTML = html;
         }
 
-        window.deleteUser = async function (i) {
-
-            let u = allData[i];
-
+        // POPRAWKA: Usunięcie za pomocą unikalnego ID dokumentu z Firebase
+        window.deleteUser = async function (id) {
             if (!confirm("Usunąć tego kandydata?")) return;
 
-            await deleteDoc(doc(db, "wyniki", u.id));
-
-            load();
+            try {
+                await deleteDoc(doc(db, "wyniki", id));
+                await load();
+            } catch (error) {
+                console.error("Błąd podczas usuwania użytkownika:", error);
+                alert("Nie udało się usunąć kandydata.");
+            }
         }
 
         function renderStats() {
-
             let stats = {};
 
             allData.forEach(user => {
-                user.wybory.forEach(w => {
+                if (user.wybory && Array.isArray(user.wybory)) {
+                    user.wybory.forEach(w => {
+                        if (!stats[w.pytanie]) stats[w.pytanie] = {};
+                        if (!stats[w.pytanie][w.odpowiedz]) stats[w.pytanie][w.odpowiedz] = 0;
 
-                    if (!stats[w.pytanie]) stats[w.pytanie] = {};
-                    if (!stats[w.pytanie][w.odpowiedz]) stats[w.pytanie][w.odpowiedz] = 0;
-
-                    stats[w.pytanie][w.odpowiedz]++;
-                });
+                        stats[w.pytanie][w.odpowiedz]++;
+                    });
+                }
             });
 
             let html = "";
 
             for (let q in stats) {
-
                 html += `<h4>${q}</h4>`;
-
                 for (let a in stats[q]) {
                     html += `<p>${a} → ${stats[q][a]}x</p>`;
                 }
-
                 html += "<hr>";
             }
 
-            document.getElementById("stats").innerHTML = html;
+            // Zabezpieczenie na wypadek braku jakichkolwiek statystyk
+            document.getElementById("stats").innerHTML = html || "Brak danych do wyświetlenia.";
         }
 
         load();
