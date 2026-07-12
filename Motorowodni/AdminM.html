@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Holownik</title>
+    <title>Motorowodni</title>
     <link rel="icon" type="image/x-icon" href="icon.ico">
 
     <style>
@@ -96,10 +96,14 @@
             from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyC_c5yD2XF-mbCK1NGLYMdIk7UVKGsLxoU",
-            authDomain: "motorowodni-49c56.firebaseapp.com",
-            projectId: "motorowodni-49c56"
-        };
+                apiKey: "AIzaSyC_c5yD2XF-mbCK1NGLYMdIk7UVKGsLxoU",
+                authDomain: "motorowodni-49c56.firebaseapp.com",
+                projectId: "motorowodni-49c56",
+                storageBucket: "motorowodni-49c56.firebasestorage.app",
+                messagingSenderId: "634414019790",
+                appId: "1:634414019790:web:f7ad6c6fc8bc424337cc9f",
+                measurementId: "G-9E6DFZ072J"
+            };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
@@ -237,7 +241,7 @@
         let allData = [];
 
         async function load() {
-            const snap = await getDocs(collection(db, "holownik"));
+            const snap = await getDocs(collection(db, "motorowodni"));
             
             document.getElementById("search").removeEventListener("input", renderUsers);
             document.getElementById("search").addEventListener("input", renderUsers);
@@ -370,7 +374,7 @@
             if (!confirm("Usunąć tego kandydata?")) return;
 
             try {
-                await deleteDoc(doc(db, "holownik", id));
+                await deleteDoc(doc(db, "motorowodni", id));
                 await load();
             } catch (error) {
                 console.error("Błąd podczas usuwania użytkownika:", error);
