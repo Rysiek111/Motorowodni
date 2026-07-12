@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Motorowodni</title>
+    <title>Panel Administratora - Motorowodni</title>
     <link rel="icon" type="image/x-icon" href="icon.ico">
 
     <style>
@@ -54,7 +54,6 @@
             border-bottom: 1px solid #334155;
         }
 
-        /* Styl dla wyróżnienia wyników kandydata na liście */
         .score-badge {
             color: white;
             padding: 2px 6px;
@@ -69,7 +68,7 @@
 
 <body>
 
-    <h1>📊 Analiza wyników</h1>
+    <h1>📊 Analiza wyników - Egzaminy Motorowodne</h1>
 
     <div class="section">
         <h2>🟦 Dashboard</h2>
@@ -78,7 +77,7 @@
     </div>
 
     <div class="section">
-        <h2>🟨 Holownicy</h2>
+        <h2>🟨 Lista Egzaminowanych</h2>
         <input id="search" placeholder="Szukaj kandydata..."
             style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px; border:none;">
         <div id="users"></div>
@@ -86,157 +85,26 @@
 
     <div class="section">
         <h2>🟩 Profil kandydata</h2>
-        <div id="profile">Kliknij kandydata</div>
+        <div id="profile">Kliknij kandydata, aby załadować szczegółowy arkusz odpowiedzi</div>
     </div>
 
     <script type="module">
-
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getFirestore, getDocs, collection, deleteDoc, doc }
+        import { getFirestore, getDocs, collection, deleteDoc, doc, getDoc }
             from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
-                apiKey: "AIzaSyC_c5yD2XF-mbCK1NGLYMdIk7UVKGsLxoU",
-                authDomain: "motorowodni-49c56.firebaseapp.com",
-                projectId: "motorowodni-49c56",
-                storageBucket: "motorowodni-49c56.firebasestorage.app",
-                messagingSenderId: "634414019790",
-                appId: "1:634414019790:web:f7ad6c6fc8bc424337cc9f",
-                measurementId: "G-9E6DFZ072J"
-            };
+            apiKey: "AIzaSyC_c5yD2XF-mbCK1NGLYMdIk7UVKGsLxoU",
+            authDomain: "motorowodni-49c56.firebaseapp.com",
+            projectId: "motorowodni-49c56",
+            storageBucket: "motorowodni-49c56.firebasestorage.app",
+            messagingSenderId: "634414019790",
+            appId: "1:634414019790:web:f7ad6c6fc8bc424337cc9f",
+            measurementId: "G-9E6DFZ072J"
+        };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-
-        // Baza pytań do sprawdzania poprawności odpowiedzi w profilu
-        const pytania = [
-            {
-                "tresc": "Podczas holowania narciarz podniósł kciuk do góry, oznacza to:",
-                "odp": ["Jedź do domu", "Zwiększ prędkość", "Wszystko w porządku"],
-                "poprawna": 1
-            },
-            {
-                "tresc": "Holowany narciarz widzi wyciągniętą poziomo rękę obserwatora z lewej burty, oznacza to:",
-                "odp": ["Trzymaj się lewej burty", "Zmniejszamy prędkość", "Łódź skręca w lewo"],
-                "poprawna": 0
-            },
-            {
-                "tresc": "W jaki sposób zakończysz jazdę holowanego?",
-                "odp": ["Przez wolne wytracanie prędkości", "Przez zdecydowane zdjęcie obrotów manetką", "Przez gwałturny zwrot"],
-                "poprawna": 0
-            },
-            {
-                "tresc": "W jaki sposób narciarz lub inny holowany na obiekcie nawodnym sygnalizuje powrót do bazy?",
-                "odp": ["Porusza dłonią uniesioną nad głową", "Kciukiem ręki skierowanym w dół", "Wskazuje wyciągniętą rękę w kierunku bazy"],
-                "poprawna": 0
-            },
-            {
-                "tresc": "Holowany narciarz lub inny holowany na obiektach nawodnych po wywrotce uniósł złączone ręce w górę, oznacza to:",
-                "odp": ["Potrzebuję pomocy", "Uwaga, niebezpieczeństwo zafalowania", "Chcę kontynuować jazdę"],
-                "poprawna": 2
-            },
-            {
-                "tresc": "Z jaką prędkością należy holować narciarza?",
-                "odp": ["30km/godz.", "40km/godz.", "W zależności od umiejętności i kondycji narciarza"],
-                "poprawna": 2
-            },
-            {
-                "tresc": "Człowiek znajdujący się w wodzie o temperaturze 10°C może przeżyć:",
-                "odp": ["12 godzin", "6 godzin", "2-3 godzin"],
-                "poprawna": 2
-            },
-            {
-                "tresc": "Jaka jest przyczyna upadku holowanego narciarza na plecy?",
-                "odp": ["Za szybka jazda", "Wyprostowane kolana", "Za wysoko uniesiony drążek holowniczy"],
-                "poprawna": 2
-            },
-            {
-                "tresc": "Podczas startu narciarza z wody powinien on trzymać ręce:",
-                "odp": ["Wyprostowane", "Zgięte w łokciach pod kątem prostym", "Zgięte w łokciach i dociągnięte do klatki piersiowej"],
-                "poprawna": 2
-            },
-            {
-                "tresc": "Co oznacza przedstawiony znak?",
-                "obrazek": "znak_narciarstwo.png",
-                "odp": ["Zezwolenie na uprawianie narciarstwa wodnego oraz holowanie statków powietrznych za statkiem", "Akwen wyłącznie do uprawiania narciarstwa wodnego oraz holowania statków powietrznych za statkiem", "Zakaz holowania narciarzy wodnych"],
-                "poprawna": 0
-            },
-            {
-                "tresc": "Co oznacza gwałtowne podnoszenie i opuszczanie ręki przez sternika?",
-                "odp": ["Puść linę", "Trzymaj się w kilwaterze", "Uważaj, zwalniamy prędkość"],
-                "poprawna": 0
-            },
-            {
-                "tresc": "Co oznacza uniesienie ręki sternika w górę?",
-                "odp": ["Sternik informuje holowanego – powrót do domu", "Sternik informuje holowanego – uwaga niebezpieczeństwo, zostań w śladzie łodzi", "Koniec pływania – odrzuć drążek"],
-                "poprawna": 0
-            },
-            {
-                "tresc": "Wskazana szerokość drążka holującego to:",
-                "odp": ["15-24 cm", "24-36 cm", "37-55 cm"],
-                "poprawna": 1
-            },
-            {
-                "tresc": "Lina holownicza powinna być:",
-                "odp": ["Tonąca", "Pływająca", "Rozcinająca"],
-                "poprawna": 1
-            },
-            {
-                "tresc": "Rozpoczęcie holowania banana, koła lub innych dmuchawców powinno się zacząć:",
-                "odp": ["Przy luźnej linie holowniczej", "Przy linie częściowo sklarowanej", "Przy linie naprężonej"],
-                "poprawna": 2
-            },
-            {
-                "tresc": "Kto jest prawnie odpowiedzialny za wypadek podczas holowania narciarza lub innych obiektów pływających?",
-                "odp": ["Obserwator razem z narciarzem", "Sternik", "Sternik razem z obserwatorem"],
-                "poprawna": 1
-            },
-            {
-                "tresc": "Jaka musi być minimalna szerokość akwenu z bezpieczną wodą do holowania narciarza lub innych obiektów pływających?",
-                "odp": ["30 metrów", "60 metrów", "50 metrów"],
-                "poprawna": 2
-            },
-            {
-                "tresc": "Kto może prowadzić jednostkę podczas holowania?",
-                "odp": ["Posiadające patent minimum sternika motorowodnego i ukończone 14 lat", "Posiadające patent minimum sternika motorowodnego i ukończone 16 lat", "Posiadające patent minimum sternika motorowodnego i ukończone 18 lat"],
-                "poprawna": 2
-            },
-            {
-                "tresc": "Przyczyna upadku narciarza na twarz to:",
-                "odp": ["Za szybka jazda", "Złamanie w pasie", "Za wysoko trzymany hol"],
-                "poprawna": 0
-            },
-            {
-                "tresc": "Z jaką prędkością holujemy dmuchawca?",
-                "odp": ["50km/h", "40km/h", "Bezpieczną, określoną przez producenta"],
-                "poprawna": 2
-            },
-            {
-                "tresc": "Holowanie narciarza i innych obiektów pływających po zmroku jest:",
-                "odp": ["Dozwolone przy dodatkowym oświetleniu łodzi", "Dozwolone przy dodatkowym oświetleniu łodzi umieszczonym na rufie", "Bezwzględnie zabronione"],
-                "poprawna": 2
-            },
-            {
-                "tresc": "Wskazana średnica drążka holowniczego to:",
-                "odp": ["1,3cm – 1,8cm", "1,7cm – 2,2cm", "2,5cm – 2,8cm"],
-                "poprawna": 2
-            },
-            {
-                "tresc": "Minimalna szerokość akwenu z bezpieczną wodą w miejscu zawracania łodzi z holowanym narciarzem lub innym obiektem pływającym musi wynosić:",
-                "odp": ["100 metrów", "150 metrów", "200 metrów"],
-                "poprawna": 1
-            },
-            {
-                "tresc": "Kiedy holowany narciarz musi mieć założony kapok lub inny środek asekuracyjny?",
-                "odp": ["Przy złej pogodzie", "Zawsze", "W zależności od umiejętności"],
-                "poprawna": 1
-            },
-            {
-                "tresc": "Jaką jednostką holowanie narciarza jest zabronione?",
-                "odp": ["Jednostką sterowaną rumplem", "Jednostką sterowanego kołem sterowym", "Skuterem wodnym"],
-                "poprawna": 0
-            }
-        ];
 
         let allData = [];
 
@@ -247,10 +115,8 @@
             document.getElementById("search").addEventListener("input", renderUsers);
 
             allData = [];
-
             snap.forEach(docSnap => {
                 let d = docSnap.data();
-
                 allData.push({
                     id: docSnap.id,
                     ...d
@@ -263,7 +129,6 @@
 
         function renderDashboard() {
             document.getElementById("count").innerText = allData.length;
-
             let today = new Date().toDateString();
 
             let todayCount = allData.filter(d => {
@@ -289,21 +154,21 @@
                     let wynikProcent = u.procent !== undefined ? u.procent + "%" : "-";
                     let wynikPoprawne = u.poprawne !== undefined ? u.poprawne : null;
                     let wyswietlanePoprawne = wynikPoprawne !== null ? wynikPoprawne : "-";
+                    let kodZestawu = u.zestaw || "ZESTAW_2aHL";
 
-                    // --- KOLOROWANIE OD PUNKTY >= 20 ---
+                    // Próg zaliczenia: zielony od 65 poprawnych odpowiedzi na 75 pytań
                     let kolorBadge = "#64748b"; 
-
                     if (wynikPoprawne !== null) {
-                        if (wynikPoprawne >= 20) {
-                            kolorBadge = "#10b981"; // Zielony
+                        if (wynikPoprawne >= 65) {
+                            kolorBadge = "#10b981"; 
                         } else {
-                            kolorBadge = "#ef4444"; // Czerwony
+                            kolorBadge = "#ef4444"; 
                         }
                     }
 
                     html += `
                         <div class="card">
-                            <b>${u.gracz}</b> 
+                            <b>${u.gracz}</b> <span style="color:#94a3b8; font-size:0.9em;">(${kodZestawu})</span>
                             <span class="score-badge" style="background-color: ${kolorBadge};">
                                 ${wynikProcent} (${wyswietlanePoprawne} popr.)
                             </span><br>
@@ -317,50 +182,66 @@
             document.getElementById("users").innerHTML = html;
         }
 
-        window.showProfile = function (id) {
+        window.showProfile = async function (id) {
             let u = allData.find(user => user.id === id);
             if (!u) return;
 
+            document.getElementById("profile").innerHTML = "<h3>⏳ Pobieranie odpowiedniego zestawu pytań z bazy...</h3>";
+
+            let kodZestawu = u.zestaw || "ZESTAW_2aHL";
+            let pytaniaZestawu = [];
+
+            try {
+                const docRef = doc(db, "baza_pytan", kodZestawu);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    pytaniaZestawu = docSnap.data().pytanya || docSnap.data().pytania;
+                }
+            } catch (err) {
+                console.error("Błąd ładowania struktury pytań:", err);
+            }
+
             let wynikProcent = u.procent !== undefined ? u.procent + "%" : "-";
             let wynikPoprawne = u.poprawne !== undefined ? u.poprawne : "-";
+            let statusEgzaminu = u.poprawne >= 65 ? "<b style='color:#4ade80;'>ZDAŁ ✓</b>" : "<b style='color:#f87171;'>NEGATYWNY ✗</b>";
 
-            let html = `<h3>👤 ${u.gracz}</h3>`;
-            html += `<p><b>Wynik ogólny:</b> ${wynikProcent} (Poprawne odpowiedzi: ${wynikPoprawne})</p><hr>`;
+            let html = `<h3>👤 Kandydat: ${u.gracz}</h3>`;
+            html += `<p><b>Arkusz:</b> ${kodZestawu} | <b>Wynik końcowy:</b> ${statusEgzaminu}</p>`;
+            html += `<p><b>Statystyki:</b> ${wynikProcent} (Poprawne: ${wynikPoprawne} / 75)</p><hr>`;
 
             if (u.wybory && Array.isArray(u.wybory)) {
                 u.wybory.forEach((w, j) => {
-                    
-                    // 1. Próbujemy dopasować pytanie z bazy na podstawie tekstu pytania lub NumerPytania (indeksu)
                     let pytanieObj = null;
-                    if (w.pytanie) {
-                        pytanieObj = pytania.find(p => p.tresc === w.pytanie);
-                    } else if (w.NumerPytania !== undefined) {
-                        // Jeśli w bazie zapisujesz np. NumerPytania: 1, to w tablicy JS ma indeks 0 (NumerPytania - 1)
-                        pytanieObj = pytania[w.NumerPytania - 1] || pytania[w.NumerPytania];
+                    if (w.pytanie && pytaniaZestawu.length > 0) {
+                        pytanieObj = pytaniaZestawu.find(p => p.tresc === w.pytanie);
                     }
 
                     let trescPytania = w.pytanie || (pytanieObj ? pytanieObj.tresc : `Pytanie ${j + 1}`);
                     let odpowiedzKandydata = w.odpowiedz || "Brak odpowiedzi";
 
-                    // 2. Weryfikacja poprawności i dobór koloru
-                    let kolorOdpowiedzi = "white"; // Domyślny kolor tekstu
+                    let kolorOdpowiedzi = "white";
                     let podpowiedzPrawidlowej = "";
+                    let imgHtml = "";
 
                     if (pytanieObj) {
                         let tekstPoprawnejOdpowiedzi = pytanieObj.odp[pytanieObj.poprawna];
+                        if (pytanieObj.obrazek) {
+                            imgHtml = `<br><img src="${pytanieObj.obrazek}" style="max-width:140px; border-radius:6px; margin:8px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.4);">`;
+                        }
 
                         if (odpowiedzKandydata === tekstPoprawnejOdpowiedzi) {
-                            kolorOdpowiedzi = "#4ade80"; // Soczysty zielony dla poprawnej
+                            kolorOdpowiedzi = "#4ade80";
                         } else {
-                            kolorOdpowiedzi = "#f87171"; // Czerwony dla błędnej
+                            kolorOdpowiedzi = "#f87171";
                             podpowiedzPrawidlowej = ` <span style="color: #94a3b8; font-size: 0.9em;">(Poprawna: ${tekstPoprawnejOdpowiedzi})</span>`;
                         }
                     }
 
                     html += `
-                        <p>${j + 1}. <b>${trescPytania}</b><br>
-                           Odpowiedź: <span style="color: ${kolorOdpowiedzi}; font-weight: bold;">${odpowiedzKandydata}</span>${podpowiedzPrawidlowej}
-                        </p>
+                        <div style="margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px dashed #334155;">
+                            <p style="margin: 0 0 4px 0;">${j + 1}. <b>${trescPytania}</b>${imgHtml}</p>
+                            <p style="margin: 0;">Odpowiedź: <span style="color: ${kolorOdpowiedzi}; font-weight: bold;">${odpowiedzKandydata}</span>${podpowiedzPrawidlowej}</p>
+                        </div>
                     `;
                 });
             } else {
@@ -371,7 +252,7 @@
         }
 
         window.deleteUser = async function (id) {
-            if (!confirm("Usunąć tego kandydata?")) return;
+            if (!confirm("Czy na pewno chcesz trwale usunąć wynik tego kandydata?")) return;
 
             try {
                 await deleteDoc(doc(db, "motorowodni", id));
@@ -383,9 +264,7 @@
         }
 
         load();
-
     </script>
-
 </body>
 
 </html>

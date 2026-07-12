@@ -192,37 +192,32 @@
     </div>
 
     <script type="module">
-        // 🔥 FIREBASE
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getFirestore, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getFirestore, addDoc, collection, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
-                apiKey: "AIzaSyC_c5yD2XF-mbCK1NGLYMdIk7UVKGsLxoU",
-                authDomain: "motorowodni-49c56.firebaseapp.com",
-                projectId: "motorowodni-49c56",
-                storageBucket: "motorowodni-49c56.firebasestorage.app",
-                messagingSenderId: "634414019790",
-                appId: "1:634414019790:web:f7ad6c6fc8bc424337cc9f",
-                measurementId: "G-9E6DFZ072J"
-            };
+            apiKey: "AIzaSyC_c5yD2XF-mbCK1NGLYMdIk7UVKGsLxoU",
+            authDomain: "motorowodni-49c56.firebaseapp.com",
+            projectId: "motorowodni-49c56",
+            storageBucket: "motorowodni-49c56.firebasestorage.app",
+            messagingSenderId: "634414019790",
+            appId: "1:634414019790:web:f7ad6c6fc8bc424337cc9f",
+            measurementId: "G-9E6DFZ072J"
+        };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // 📌 MIEJSCE NA TWOJE PYTANIA DLA NOWEJ APLIKACJI
-        // (Możesz tu wkleić listę pytań specyficznych dla patentu sternika motorowodnego)
-        let pytania = [
-            {
-                "tresc": "Przykładowe pytanie motorowodne: Kto ustępuje pierwszeństwa na wodzie?",
-                "odp": ["Statek o napędzie mechanicznym ustępuje żaglowemu", "Statek żaglowy ustępuje mechanicznemu", "Ten z prawej strony ma zawsze pierwszeństwo"],
-                "poprawna": 0
-            }
-        ];
-
+        let pytania = [];
         let wybory = [];
         let poprawne = 0;
         let index = 0;
         let daneGracza = "";
+        let wybranyZestaw = "";
+
+        // Lista istniejących zestawów w Twoim Firestore. System wylosuje jeden z nich.
+        // Gdy dodasz ZESTAW_B lub ZESTAW_C, po prostu dopisz je do tej tablicy: ["ZESTAW_2aHL", "ZESTAW_B", "ZESTAW_C"]
+        const dostepneZestawy = ["ZESTAW_2aHL"];
 
         function shuffle(array) {
             for (let i = array.length - 1; i > 0; i--) {
@@ -248,7 +243,6 @@
             const btn = document.getElementById("startBtn");
 
             if (!input) return;
-
             let value = input.value.trim();
 
             if (value.length < 3) {
@@ -265,31 +259,53 @@
         window.start = function () {
             appDiv.innerHTML = `
                 <div class="fade-in">
-                    <label class="input-label">Podaj Imię i Nazwisko</label>
+                    <label class="input-label">Podaj Imię i Nazwisko kandydata</label>
                     <div class="input-wrapper">
                         <span class="icon">👤</span>
                         <input id="nickInput" placeholder="Wpisz swoje Imię i Nazwisko..." oninput="validateNick()" autocomplete="off">
                     </div>
                     <div id="nickError" class="error"></div>
                 </div>
-                <div class="fade-in" style="animation-delay:0.1s">
+                <div class="fade-in" style="animation-delay:0.1s; margin-top: 15px;">
                     <button id="startBtn" onclick="startQuiz()" disabled>Rozpocznij Test</button>
                 </div>
             `;
         }
 
-        window.startQuiz = function () {
+        window.startQuiz = async function () {
             const input = document.getElementById("nickInput");
             daneGracza = input ? input.value.trim() : "";
 
-            if (daneGracza.length < 3) {
+            if (daneGracza.length < 3) return;
+
+            // Losowanie zestawu bez wiedzy użytkownika
+            const losowyIndeks = Math.floor(Math.random() * dostepneZestawy.length);
+            wybranyZestaw = dostepneZestawy[losowyIndeks];
+
+            try {
+                appDiv.innerHTML = `<h2>Generowanie losowego arkusza egzaminacyjnego...</h2>`;
+                const docRef = doc(db, "baza_pytan", wybranyZestaw);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    pytania = docSnap.data().pytanya || docSnap.data().pytania;
+                } else {
+                    alert("Wystąpił problem z konfiguracją arkuszy w bazie danych!");
+                    menu();
+                    return;
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Błąd połączenia z bazą Firebase!");
+                menu();
                 return;
             }
 
-            shuffle(pytania);
             index = 0;
             wybory = [];
             poprawne = 0;
+
+            // Odpowiedzi A, B, C są mieszane, ale pytania idą w stałej kolejności 1-75
             pytania.forEach(p => { 
                 p.odpowiedziLosowe = [...p.odp].map((x, i) => ({ tekst: x, idx: i })); 
                 shuffle(p.odpowiedziLosowe); 
@@ -304,7 +320,7 @@
                         <div class="progress-inner" style="width:100%"></div>
                     </div>
                     <h2 class="fade" style="text-align:center;">
-                        Dziękuję za odpowiedzi! Trwa zapisywanie wyniku...
+                        Dziękuję za odpowiedzi! Trwa obliczanie wyniku...
                     </h2>
                 `;
                 zapiszWybor();
@@ -326,7 +342,7 @@
             `;
 
             if (p.obrazek) {
-                html += `<img src="${p.obrazek}" alt="Znak pomocniczy" class="question-img fade">`;
+                html += `<img src="${p.obrazek}" alt="Rysunek pomocniczy" class="question-img fade">`;
             }
 
             idx.forEach((i) => {
@@ -359,9 +375,10 @@
 
         async function zapiszWybor() {
             try {
-                // 📝 Zmiana docelowej kolekcji na "motorowodni" dla tej aplikacji
+                // Do bazy w Firestore wciąż wysyłamy nazwę zestawu, więc Ty jako admin w AdminM.html zobaczysz co dostał!
                 await addDoc(collection(db, "motorowodni"), {
                     gracz: daneGracza,
+                    zestaw: wybranyZestaw, 
                     wybory: wybory,
                     poprawne: poprawne,
                     procent: Math.round((poprawne / pytania.length) * 100),
@@ -381,10 +398,14 @@
                     `;
                 });
 
+                let czyZdal = poprawne >= 65;
+                let statusEgzaminu = czyZdal ? "<span style='color:#34d399;'>ZALICZONY ✓</span>" : "<span style='color:#f87171;'>NIEZALICZONY ✗</span>";
+
                 appDiv.innerHTML = `
                     <div style="text-align:center;" class="fade">
-                        <h2>Test zakończony!</h2>
+                        <h2>Egzamin zakończony!</h2>
                         <p style="font-size: 18px; color: #cbd5e1;"><strong>${daneGracza}</strong></p>
+                        <p style="font-size: 16px; color: #94a3b8; margin-top:5px;">Wynik egzaminu: ${statusEgzaminu}</p>
                         <h2 style="color: #38bdf8; margin-top: 10px; margin-bottom: 25px;">
                             Twój wynik: ${poprawne} / ${pytania.length}<br>
                             Procent: ${Math.round((poprawne / pytania.length) * 100)}%
@@ -404,7 +425,7 @@
                 }
             } catch (e) {
                 console.error(e);
-                alert("Błąd zapisu do bazy danych!");
+                alert("Błąd zapisu wyniku do bazy danych!");
             }
         }
 
