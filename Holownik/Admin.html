@@ -237,7 +237,7 @@
         let allData = [];
 
         async function load() {
-            const snap = await getDocs(collection(db, "holownik"));
+            const snap = await getDocs(collection(db, "wyniki"));
             
             document.getElementById("search").removeEventListener("input", renderUsers);
             document.getElementById("search").addEventListener("input", renderUsers);
@@ -370,7 +370,7 @@
             if (!confirm("Usunąć tego kandydata?")) return;
 
             try {
-                await deleteDoc(doc(db, "holownik", id));
+                await deleteDoc(doc(db, "wyniki", id));
                 await load();
             } catch (error) {
                 console.error("Błąd podczas usuwania użytkownika:", error);
