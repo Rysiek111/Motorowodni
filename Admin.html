@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Panel Kontrolny</title>
+    <title>Recruiter Dashboard</title>
     <link rel="icon" type="image/x-icon" href="icon.ico">
 
     <style>
@@ -54,7 +54,7 @@
             border-bottom: 1px solid #334155;
         }
 
-        /* Styl dla wyróżnienia wyników kandydata */
+        /* Styl dla wyróżnienia wyników kandydata na liście */
         .score-badge {
             color: white;
             padding: 2px 6px;
@@ -103,6 +103,136 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+
+        // Baza pytań do sprawdzania poprawności odpowiedzi w profilu
+        const pytania = [
+            {
+                "tresc": "Podczas holowania narciarz podniósł kciuk do góry, oznacza to:",
+                "odp": ["Jedź do domu", "Zwiększ prędkość", "Wszystko w porządku"],
+                "poprawna": 1
+            },
+            {
+                "tresc": "Holowany narciarz widzi wyciągniętą poziomo rękę obserwatora z lewej burty, oznacza to:",
+                "odp": ["Trzymaj się lewej burty", "Zmniejszamy prędkość", "Łódź skręca w lewo"],
+                "poprawna": 0
+            },
+            {
+                "tresc": "W jaki sposób zakończysz jazdę holowanego?",
+                "odp": ["Przez wolne wytracanie prędkości", "Przez zdecydowane zdjęcie obrotów manetką", "Przez gwałturny zwrot"],
+                "poprawna": 0
+            },
+            {
+                "tresc": "W jaki sposób narciarz lub inny holowany na obiekcie nawodnym sygnalizuje powrót do bazy?",
+                "odp": ["Porusza dłonią uniesioną nad głową", "Kciukiem ręki skierowanym w dół", "Wskazuje wyciągniętą rękę w kierunku bazy"],
+                "poprawna": 0
+            },
+            {
+                "tresc": "Holowany narciarz lub inny holowany na obiektach nawodnych po wywrotce uniósł złączone ręce w górę, oznacza to:",
+                "odp": ["Potrzebuję pomocy", "Uwaga, niebezpieczeństwo zafalowania", "Chcę kontynuować jazdę"],
+                "poprawna": 2
+            },
+            {
+                "tresc": "Z jaką prędkością należy holować narciarza?",
+                "odp": ["30km/godz.", "40km/godz.", "W zależności od umiejętności i kondycji narciarza"],
+                "poprawna": 2
+            },
+            {
+                "tresc": "Człowiek znajdujący się w wodzie o temperaturze 10°C może przeżyć:",
+                "odp": ["12 godzin", "6 godzin", "2-3 godzin"],
+                "poprawna": 2
+            },
+            {
+                "tresc": "Jaka jest przyczyna upadku holowanego narciarza na plecy?",
+                "odp": ["Za szybka jazda", "Wyprostowane kolana", "Za wysoko uniesiony drążek holowniczy"],
+                "poprawna": 2
+            },
+            {
+                "tresc": "Podczas startu narciarza z wody powinien on trzymać ręce:",
+                "odp": ["Wyprostowane", "Zgięte w łokciach pod kątem prostym", "Zgięte w łokciach i dociągnięte do klatki piersiowej"],
+                "poprawna": 2
+            },
+            {
+                "tresc": "Co oznacza przedstawiony znak?",
+                "obrazek": "znak_narciarstwo.png",
+                "odp": ["Zezwolenie na uprawianie narciarstwa wodnego oraz holowanie statków powietrznych za statkiem", "Akwen wyłącznie do uprawiania narciarstwa wodnego oraz holowania statków powietrznych za statkiem", "Zakaz holowania narciarzy wodnych"],
+                "poprawna": 0
+            },
+            {
+                "tresc": "Co oznacza gwałtowne podnoszenie i opuszczanie ręki przez sternika?",
+                "odp": ["Puść linę", "Trzymaj się w kilwaterze", "Uważaj, zwalniamy prędkość"],
+                "poprawna": 0
+            },
+            {
+                "tresc": "Co oznacza uniesienie ręki sternika w górę?",
+                "odp": ["Sternik informuje holowanego – powrót do domu", "Sternik informuje holowanego – uwaga niebezpieczeństwo, zostań w śladzie łodzi", "Koniec pływania – odrzuć drążek"],
+                "poprawna": 0
+            },
+            {
+                "tresc": "Wskazana szerokość drążka holującego to:",
+                "odp": ["15-24 cm", "24-36 cm", "37-55 cm"],
+                "poprawna": 1
+            },
+            {
+                "tresc": "Lina holownicza powinna być:",
+                "odp": ["Tonąca", "Pływająca", "Rozcinająca"],
+                "poprawna": 1
+            },
+            {
+                "tresc": "Rozpoczęcie holowania banana, koła lub innych dmuchawców powinno się zacząć:",
+                "odp": ["Przy luźnej linie holowniczej", "Przy linie częściowo sklarowanej", "Przy linie naprężonej"],
+                "poprawna": 2
+            },
+            {
+                "tresc": "Kto jest prawnie odpowiedzialny za wypadek podczas holowania narciarza lub innych obiektów pływających?",
+                "odp": ["Obserwator razem z narciarzem", "Sternik", "Sternik razem z obserwatorem"],
+                "poprawna": 1
+            },
+            {
+                "tresc": "Jaka musi być minimalna szerokość akwenu z bezpieczną wodą do holowania narciarza lub innych obiektów pływających?",
+                "odp": ["30 metrów", "60 metrów", "50 metrów"],
+                "poprawna": 2
+            },
+            {
+                "tresc": "Kto może prowadzić jednostkę podczas holowania?",
+                "odp": ["Posiadające patent minimum sternika motorowodnego i ukończone 14 lat", "Posiadające patent minimum sternika motorowodnego i ukończone 16 lat", "Posiadające patent minimum sternika motorowodnego i ukończone 18 lat"],
+                "poprawna": 2
+            },
+            {
+                "tresc": "Przyczyna upadku narciarza na twarz to:",
+                "odp": ["Za szybka jazda", "Złamanie w pasie", "Za wysoko trzymany hol"],
+                "poprawna": 0
+            },
+            {
+                "tresc": "Z jaką prędkością holujemy dmuchawca?",
+                "odp": ["50km/h", "40km/h", "Bezpieczną, określoną przez producenta"],
+                "poprawna": 2
+            },
+            {
+                "tresc": "Holowanie narciarza i innych obiektów pływających po zmroku jest:",
+                "odp": ["Dozwolone przy dodatkowym oświetleniu łodzi", "Dozwolone przy dodatkowym oświetleniu łodzi umieszczonym na rufie", "Bezwzględnie zabronione"],
+                "poprawna": 2
+            },
+            {
+                "tresc": "Wskazana średnica drążka holowniczego to:",
+                "odp": ["1,3cm – 1,8cm", "1,7cm – 2,2cm", "2,5cm – 2,8cm"],
+                "poprawna": 2
+            },
+            {
+                "tresc": "Minimalna szerokość akwenu z bezpieczną wodą w miejscu zawracania łodzi z holowanym narciarzem lub innym obiektem pływającym musi wynosić:",
+                "odp": ["100 metrów", "150 metrów", "200 metrów"],
+                "poprawna": 1
+            },
+            {
+                "tresc": "Kiedy holowany narciarz musi mieć założony kapok lub inny środek asekuracyjny?",
+                "odp": ["Przy złej pogodzie", "Zawsze", "W zależności od umiejętności"],
+                "poprawna": 1
+            },
+            {
+                "tresc": "Jaką jednostką holowanie narciarza jest zabronione?",
+                "odp": ["Jednostką sterowaną rumplem", "Jednostką sterowanego kołem sterowym", "Skuterem wodnym"],
+                "poprawna": 0
+            }
+        ];
 
         let allData = [];
 
@@ -156,17 +286,16 @@
                     let wynikPoprawne = u.poprawne !== undefined ? u.poprawne : null;
                     let wyswietlanePoprawne = wynikPoprawne !== null ? wynikPoprawne : "-";
 
-                    // --- DYNAMICZNY KOLOR NA BAZIE PUNTKÓW ---
-                    let kolorBadge = "#64748b"; // Domyślny szary, gdy brak danych o punktach
+                    // --- KOLOROWANIE OD PUNKTY >= 20 ---
+                    let kolorBadge = "#64748b"; 
 
                     if (wynikPoprawne !== null) {
                         if (wynikPoprawne >= 20) {
-                            kolorBadge = "#10b981"; // Zielony od 20 punktów
+                            kolorBadge = "#10b981"; // Zielony
                         } else {
-                            kolorBadge = "#ef4444"; // Czerwony poniżej 20 punktów
+                            kolorBadge = "#ef4444"; // Czerwony
                         }
                     }
-                    // ----------------------------------------
 
                     html += `
                         <div class="card">
@@ -191,15 +320,44 @@
             let wynikProcent = u.procent !== undefined ? u.procent + "%" : "-";
             let wynikPoprawne = u.poprawne !== undefined ? u.poprawne : "-";
 
-            let html = `<h3>${u.gracz}</h3>`;
+            let html = `<h3>👤 ${u.gracz}</h3>`;
             html += `<p><b>Wynik ogólny:</b> ${wynikProcent} (Poprawne odpowiedzi: ${wynikPoprawne})</p><hr>`;
 
             if (u.wybory && Array.isArray(u.wybory)) {
                 u.wybory.forEach((w, j) => {
-                    let identyfikatorPytania = w.pytanie || (w.NumerPytania !== undefined ? `Pytanie nr ${w.NumerPytania}` : `Pytanie ${j + 1}`);
-                    let tekstOdpowiedzi = w.odpowiedz || w.odpowiedzKandydata || "Brak odpowiedzi";
+                    
+                    // 1. Próbujemy dopasować pytanie z bazy na podstawie tekstu pytania lub NumerPytania (indeksu)
+                    let pytanieObj = null;
+                    if (w.pytanie) {
+                        pytanieObj = pytania.find(p => p.tresc === w.pytanie);
+                    } else if (w.NumerPytania !== undefined) {
+                        // Jeśli w bazie zapisujesz np. NumerPytania: 1, to w tablicy JS ma indeks 0 (NumerPytania - 1)
+                        pytanieObj = pytania[w.NumerPytania - 1] || pytania[w.NumerPytania];
+                    }
 
-                    html += `<p>${j + 1}. ${identyfikatorPytania}<br><b>${tekstOdpowiedzi}</b></p>`;
+                    let trescPytania = w.pytanie || (pytanieObj ? pytanieObj.tresc : `Pytanie ${j + 1}`);
+                    let odpowiedzKandydata = w.odpowiedz || "Brak odpowiedzi";
+
+                    // 2. Weryfikacja poprawności i dobór koloru
+                    let kolorOdpowiedzi = "white"; // Domyślny kolor tekstu
+                    let podpowiedzPrawidlowej = "";
+
+                    if (pytanieObj) {
+                        let tekstPoprawnejOdpowiedzi = pytanieObj.odp[pytanieObj.poprawna];
+
+                        if (odpowiedzKandydata === tekstPoprawnejOdpowiedzi) {
+                            kolorOdpowiedzi = "#4ade80"; // Soczysty zielony dla poprawnej
+                        } else {
+                            kolorOdpowiedzi = "#f87171"; // Czerwony dla błędnej
+                            podpowiedzPrawidlowej = ` <span style="color: #94a3b8; font-size: 0.9em;">(Poprawna: ${tekstPoprawnejOdpowiedzi})</span>`;
+                        }
+                    }
+
+                    html += `
+                        <p>${j + 1}. <b>${trescPytania}</b><br>
+                           Odpowiedź: <span style="color: ${kolorOdpowiedzi}; font-weight: bold;">${odpowiedzKandydata}</span>${podpowiedzPrawidlowej}
+                        </p>
+                    `;
                 });
             } else {
                 html += `<p>Brak szczegółowych odpowiedzi dla tego kandydata.</p>`;
