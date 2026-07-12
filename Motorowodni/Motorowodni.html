@@ -215,8 +215,6 @@
         let daneGracza = "";
         let wybranyZestaw = "";
 
-        // Lista istniejących zestawów w Twoim Firestore. System wylosuje jeden z nich.
-        // Gdy dodasz ZESTAW_B lub ZESTAW_C, po prostu dopisz je do tej tablicy: ["ZESTAW_2aHL", "ZESTAW_B", "ZESTAW_C"]
         const dostepneZestawy = ["ZESTAW_2aHL"];
 
         function shuffle(array) {
@@ -278,7 +276,6 @@
 
             if (daneGracza.length < 3) return;
 
-            // Losowanie zestawu bez wiedzy użytkownika
             const losowyIndeks = Math.floor(Math.random() * dostepneZestawy.length);
             wybranyZestaw = dostepneZestawy[losowyIndeks];
 
@@ -305,7 +302,10 @@
             wybory = [];
             poprawne = 0;
 
-            // Odpowiedzi A, B, C są mieszane, ale pytania idą w stałej kolejności 1-75
+            // KROK 1: Losowe przemieszanie całego zestawu pytań 1-75
+            shuffle(pytania);
+
+            // KROK 2: Losowe przemieszanie wariantów odpowiedzi wewnątrz każdego pytania
             pytania.forEach(p => { 
                 p.odpowiedziLosowe = [...p.odp].map((x, i) => ({ tekst: x, idx: i })); 
                 shuffle(p.odpowiedziLosowe); 
@@ -375,7 +375,6 @@
 
         async function zapiszWybor() {
             try {
-                // Do bazy w Firestore wciąż wysyłamy nazwę zestawu, więc Ty jako admin w AdminM.html zobaczysz co dostał!
                 await addDoc(collection(db, "motorowodni"), {
                     gracz: daneGracza,
                     zestaw: wybranyZestaw, 
