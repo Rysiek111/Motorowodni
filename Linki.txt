@@ -1,0 +1,12 @@
+Motorowodni:
+    Test:
+        https://rysiek111.github.io/Motorowodni/Motorowodni/Motorowodni.html
+    Nadzór:
+        https://rysiek111.github.io/Motorowodni/Motorowodni/AdminM.html
+
+Holownik:
+    Test:
+        https://rysiek111.github.io/Motorowodni/Holownik/holownik.html
+
+    Nadzór:
+        https://rysiek111.github.io/Motorowodni/Holownik/AdminH.html
