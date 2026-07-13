@@ -20,7 +20,7 @@
 
         .box {
             width: 100%;
-            max-width: 720px;
+            max-width: 900px;
             background: rgba(16, 29, 46, 0.95);
             /* Ciemny, elegancki kokpit */
             border: 1px solid rgba(56, 189, 248, 0.2);
@@ -249,10 +249,12 @@
             appDiv.innerHTML = `<button onclick="start()">Start</button>`;
         }
 
-        document.addEventListener("keypress", function (e) {
+        document.addEventListener("keydown", function (e) {
             if (e.key === "Enter") {
                 const btn = document.getElementById("startBtn");
-                if (btn && !btn.disabled) startQuiz();
+                if (btn && !btn.disabled) {
+                    startQuiz();
+                }
             }
         });
 
@@ -306,7 +308,7 @@
                 const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
-                    pytania = docSnap.data().pytanya || docSnap.data().pytania;
+                    pytania = docSnap.data().pytania;
                 } else {
                     alert("Wystąpił problem z konfiguracją arkuszy w bazie danych!");
                     menu();
@@ -323,7 +325,6 @@
             wybory = [];
             poprawne = 0;
 
-            shuffle(pytania);
 
             pytania.forEach(p => {
                 p.odpowiedziLosowe = [...p.odp].map((x, i) => ({ tekst: x, idx: i }));
@@ -383,6 +384,7 @@
             wybory.push({
                 NumerPytania: index + 1,
                 pytanie: p.tresc,
+                obrazek: p.obrazek || "",
                 odpowiedz: p.odp[i],
                 poprawna: p.odp[p.poprawna],
                 wynik: czyPoprawna
@@ -405,10 +407,10 @@
 
                 let podsumowanieSzczegolowe = "";
                 wybory.forEach((w) => {
-                    /* Zastosowanie żywego zielonego koloru (#4ade80) dla poprawnych kafelków w podsumowaniu */
                     podsumowanieSzczegolowe += `
                         <div style="text-align: left; background: #0b1524; padding: 15px; border-radius: 8px; margin-bottom: 12px; border: 1px solid ${w.wynik ? 'rgba(74, 222, 128, 0.4)' : 'rgba(248, 113, 113, 0.4)'}; border-left: 5px solid ${w.wynik ? '#4ade80' : '#f87171'}">
                             <p style="margin: 0 0 8px 0; font-weight: bold; font-size: 15px; color: #f1f5f9;">Pytanie ${w.NumerPytania}: ${w.pytanie}</p>
+                            ${w.obrazek ? `<img src="${w.obrazek}" style="max-width:250px;display:block;margin:10px auto;border-radius:8px;box-shadow:0 4px 15px rgba(0,0,0,.5);">` : ""}
                             <p style="margin: 4px 0; font-size: 14px; color: ${w.wynik ? '#4ade80' : '#f87171'}">
                                 <strong>Twoja odpowiedź:</strong> ${w.odpowiedz} ${w.wynik ? '✓' : '✗'}
                             </p>

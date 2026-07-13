@@ -110,7 +110,7 @@
 
         async function load() {
             const snap = await getDocs(collection(db, "motorowodni"));
-            
+
             document.getElementById("search").removeEventListener("input", renderUsers);
             document.getElementById("search").addEventListener("input", renderUsers);
 
@@ -154,15 +154,15 @@
                     let wynikProcent = u.procent !== undefined ? u.procent + "%" : "-";
                     let wynikPoprawne = u.poprawne !== undefined ? u.poprawne : null;
                     let wyswietlanePoprawne = wynikPoprawne !== null ? wynikPoprawne : "-";
-                    let kodZestawu = u.zestaw || "ZESTAW_2aHL";
+                    let kodZestawu = u.zestaw;
 
                     // Próg zaliczenia: zielony od 65 poprawnych odpowiedzi na 75 pytań
-                    let kolorBadge = "#64748b"; 
+                    let kolorBadge = "#64748b";
                     if (wynikPoprawne !== null) {
                         if (wynikPoprawne >= 65) {
-                            kolorBadge = "#10b981"; 
+                            kolorBadge = "#10b981";
                         } else {
-                            kolorBadge = "#ef4444"; 
+                            kolorBadge = "#ef4444";
                         }
                     }
 
@@ -188,14 +188,14 @@
 
             document.getElementById("profile").innerHTML = "<h3>⏳ Pobieranie odpowiedniego zestawu pytań z bazy...</h3>";
 
-            let kodZestawu = u.zestaw || "ZESTAW_2aHL";
+            let kodZestawu = u.zestaw;
             let pytaniaZestawu = [];
 
             try {
                 const docRef = doc(db, "baza_pytan", kodZestawu);
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
-                    pytaniaZestawu = docSnap.data().pytanya || docSnap.data().pytania;
+                    pytaniaZestawu = docSnap.data().pytania;
                 }
             } catch (err) {
                 console.error("Błąd ładowania struktury pytań:", err);
@@ -212,8 +212,8 @@
             if (u.wybory && Array.isArray(u.wybory)) {
                 u.wybory.forEach((w, j) => {
                     let pytanieObj = null;
-                    if (w.pytanie && pytaniaZestawu.length > 0) {
-                        pytanieObj = pytaniaZestawu.find(p => p.tresc === w.pytanie);
+                    if (pytaniaZestawu.length > j) {
+                        pytanieObj = pytaniaZestawu[j];
                     }
 
                     let trescPytania = w.pytanie || (pytanieObj ? pytanieObj.tresc : `Pytanie ${j + 1}`);
