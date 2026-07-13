@@ -9,7 +9,8 @@
     <style>
         body {
             margin: 0;
-            background: linear-gradient(135deg, #07111e, #0c1a2c); /* Głęboka, nocna toń oceanu */
+            background: linear-gradient(135deg, #07111e, #0c1a2c);
+            /* Głęboka, nocna toń oceanu */
             font-family: "Inter", Arial;
             display: flex;
             justify-content: center;
@@ -20,11 +21,14 @@
         .box {
             width: 100%;
             max-width: 720px;
-            background: rgba(16, 29, 46, 0.95); /* Ciemny, elegancki kokpit */
-            border: 1px solid rgba(56, 189, 248, 0.2); /* Delikatna, neonowa ramka */
+            background: rgba(16, 29, 46, 0.95);
+            /* Ciemny, elegancki kokpit */
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            /* Delikatna, neonowa ramka */
             border-radius: 16px;
             padding: 30px;
-            color: #e2e8f0; /* Jasnoszary tekst, idealny do czytania w ciemności */
+            color: #e2e8f0;
+            /* Jasnoszary tekst, idealny do czytania w ciemności */
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7), 0 0 40px rgba(56, 189, 248, 0.05);
             backdrop-filter: blur(10px);
             box-sizing: border-box;
@@ -33,7 +37,8 @@
         h1 {
             text-align: center;
             margin-bottom: 25px;
-            color: #38bdf8; /* Turkusowy neon na głównym nagłówku */
+            color: #38bdf8;
+            /* Turkusowy neon na głównym nagłówku */
             letter-spacing: 2px;
             font-weight: 800;
             text-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
@@ -52,8 +57,10 @@
             margin: 8px 0;
             border: 1px solid rgba(56, 189, 248, 0.3);
             border-radius: 10px;
-            background: #152942; /* Ciemnoniebieski przycisk bazowy */
-            color: #38bdf8; /* Tekst świecący na turkusowo */
+            background: #152942;
+            /* Ciemnoniebieski przycisk bazowy */
+            color: #38bdf8;
+            /* Tekst świecący na turkusowo */
             font-size: 15px;
             font-weight: 600;
             cursor: pointer;
@@ -73,7 +80,8 @@
         }
 
         button:hover:not(:disabled) {
-            background: #38bdf8; /* Podświetlenie przycisku */
+            background: #38bdf8;
+            /* Podświetlenie przycisku */
             color: #07111e;
             box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
             transform: translateY(-2px);
@@ -152,14 +160,12 @@
 
         .question-img {
             display: block;
-            max-width: 180px;
-            max-height: 180px;
             width: auto;
-            height: auto;
-            margin: 0 auto 20px auto;
-            border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 100%;
+            max-height: 450px;
+            margin: 15px auto 25px auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
         }
 
         .fade {
@@ -171,6 +177,7 @@
                 opacity: 0;
                 transform: translateY(8px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -186,6 +193,7 @@
                 opacity: 0;
                 transform: translateY(15px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -226,7 +234,7 @@
 
         const dostepneZestawy = [
             //"ZESTAW_1aHL", 
-            "ZESTAW_2aHL", 
+            "ZESTAW_2aHL",
             //"ZESTAW_3aHL"
         ];
 
@@ -317,9 +325,9 @@
 
             shuffle(pytania);
 
-            pytania.forEach(p => { 
-                p.odpowiedziLosowe = [...p.odp].map((x, i) => ({ tekst: x, idx: i })); 
-                shuffle(p.odpowiedziLosowe); 
+            pytania.forEach(p => {
+                p.odpowiedziLosowe = [...p.odp].map((x, i) => ({ tekst: x, idx: i }));
+                shuffle(p.odpowiedziLosowe);
             });
             pokazPytanie();
         }
@@ -388,7 +396,7 @@
             try {
                 await addDoc(collection(db, "motorowodni"), {
                     gracz: daneGracza,
-                    zestaw: wybranyZestaw, 
+                    zestaw: wybranyZestaw,
                     wybory: wybory,
                     poprawne: poprawne,
                     procent: Math.round((poprawne / pytania.length) * 100),
@@ -430,7 +438,7 @@
                     </div>
                 `;
 
-                if(window.innerHeight < 800) {
+                if (window.innerHeight < 800) {
                     document.body.style.height = "auto";
                     document.body.style.padding = "20px 0";
                 }
