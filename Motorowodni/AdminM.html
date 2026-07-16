@@ -276,7 +276,11 @@
             let html = "";
 
             allData
+            allData
                 .filter(u => u.gracz && u.gracz.toLowerCase().includes(query))
+                .sort((a, b) => {
+                    return b.data.seconds - a.data.seconds;
+                })
                 .forEach((u) => {
                     let date = "";
                     if (u.data?.seconds) {
@@ -309,7 +313,7 @@
                             <span class="score-badge" style="background-color: ${kolorBadge};">
                                 ${wynikProcent !== null ? wynikProcent.toFixed(2) + "%" : "-"} (${wyswietlanePoprawne} popr.)
                             </span><br>
-                            <small>${date}</small><br><br>
+                            <small>🕒 ${date}</small><br><br>
                             <button onclick="showProfile('${u.id}')">Profil</button>
                             <button class="delete" onclick="deleteUser('${u.id}')">Usuń</button>
                         </div>
