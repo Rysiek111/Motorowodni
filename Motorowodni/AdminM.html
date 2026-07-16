@@ -67,13 +67,20 @@
 </head>
 
 <body>
-
     <h1>📊 Analiza wyników - Patent Sternika Motorowodnego</h1>
 
     <div class="section">
         <h2>🟦 Dashboard</h2>
         <p>Kandydaci: <span id="count">0</span></p>
         <p>Testy dziś: <span id="today">0</span></p>
+        <p>Najtrudniejsze pytanie:</p>
+        <div id="hardestQuestion" style="
+    background:#334155;
+    padding:10px;
+    border-radius:8px;
+    margin-top:8px;">
+            Liczenie...
+        </div>
     </div>
 
     <div class="section">
@@ -137,6 +144,29 @@
             }).length;
 
             document.getElementById("today").innerText = todayCount;
+            let statystyki = {};
+
+            allData.forEach(u => {
+                if (!u.wybory) return;
+
+                u.wybory.forEach(w => {
+
+                    const nr = w.NumerPytania;
+
+                    if (!statystyki[nr]) {
+                        statystyki[nr] = {
+                            tresc: w.pytanie,
+                            wszystkie: 0,
+                            bledne: 0
+                        };
+                    }
+
+                    statystyki[nr].wszystkie++;
+
+                    if (!w.wynik)
+                        statystyki[nr].bledne++;
+                });
+            });
         }
 
         function renderUsers() {
@@ -203,7 +233,7 @@
 
             let wynikProcent = u.procent !== undefined ? u.procent + "%" : "-";
             let wynikPoprawne = u.poprawne !== undefined ? u.poprawne : "-";
-            let statusEgzaminu = u.poprawne >= 65 ? "<b style='color:#4ade80;'>ZDAŁ ✓</b>" : "<b style='color:#f87171;'>NEGATYWNY ✗</b>";
+            let statusEgzaminu = u.procent >= 86.67 ? "<b style='color:#4ade80;'>ZDAŁ ✓</b>" : "<b style='color:#f87171;'>NEGATYWNY ✗</b>";
 
             let html = `<h3>👤 Kandydat: ${u.gracz}</h3>`;
             html += `<p><b>Arkusz:</b> ${kodZestawu} | <b>Wynik końcowy:</b> ${statusEgzaminu}</p>`;
