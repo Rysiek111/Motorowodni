@@ -254,11 +254,16 @@
                     // Próg zaliczenia: zielony od 65 poprawnych odpowiedzi na 75 pytań
                     let kolorBadge = "#64748b";
                     if (wynikProcent !== null) {
-    if (wynikProcent >= 86.67) {
-        kolorBadge = "#10b981";
-    } else {
-        kolorBadge = "#ef4444";
-    }
+                    if (u.poprawne !== undefined && u.wybory) {
+
+                    let zdany = (u.poprawne / u.wybory.length) >= (65 / 75);
+
+                    if (zdany) {
+                        kolorBadge = "#10b981";
+                    } else {
+                        kolorBadge = "#ef4444";
+                    }
+                }
 }
 
                     html += `
@@ -298,11 +303,13 @@
 
             let wynikProcent = u.procent !== undefined ? Number(u.procent) : null;
             let wynikPoprawne = u.poprawne !== undefined ? u.poprawne : "-";
-            let statusEgzaminu = u.procent >= 86.67 ? "<b style='color:#4ade80;'>ZDAŁ ✓</b>" : "<b style='color:#f87171;'>NEGATYWNY ✗</b>";
+            let statusEgzaminu = (u.poprawne / u.wybory.length) >= (65 / 75)
+            ? "<b style='color:#4ade80;'>ZDAŁ ✓</b>"
+            : "<b style='color:#f87171;'>NEGATYWNY ✗</b>";
 
             let html = `<h3>👤 Kandydat: ${u.gracz}</h3>`;
             html += `<p><b>Arkusz:</b> ${kodZestawu} | <b>Wynik końcowy:</b> ${statusEgzaminu}</p>`;
-            html += `<p><b>Statystyki:</b> ${wynikProcent} (Poprawne: ${wynikPoprawne} / 75)</p><hr>`;
+            html += `<p><b>Statystyki:</b> ${wynikProcent}% (Poprawne: ${wynikPoprawne} / ${u.wybory.length})</p><hr>`;
 
             if (u.wybory && Array.isArray(u.wybory)) {
                 u.wybory.forEach((w, j) => {
