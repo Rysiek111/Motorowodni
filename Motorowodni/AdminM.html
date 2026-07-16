@@ -162,8 +162,11 @@
 
                     const nr = w.NumerPytania;
 
-                    if (!statystyki[nr]) {
-                        statystyki[nr] = {
+                    const klucz = u.zestaw + "_" + nr;
+
+                    if (!statystyki[klucz]) {
+                        statystyki[klucz] = {
+                            zestaw: u.zestaw,
                             numer: nr,
                             tresc: w.pytanie,
                             wszystkie: 0,
@@ -171,10 +174,10 @@
                         };
                     }
 
-                    statystyki[nr].wszystkie++;
+                    statystyki[klucz].wszystkie++;
 
                     if (!w.wynik)
-                        statystyki[nr].bledne++;
+                        statystyki[klucz].bledne++;
 
                 });
 
@@ -214,7 +217,7 @@
             border-radius:10px;
         ">
 
-            <b>${medal} Pytanie ${p.numer}</b><br><br>
+            <b>${medal} ${p.zestaw} - Pytanie ${p.numer}</b><br><br>
 
             ${p.tresc}<br><br>
 
@@ -254,17 +257,17 @@
                     // Próg zaliczenia: zielony od 65 poprawnych odpowiedzi na 75 pytań
                     let kolorBadge = "#64748b";
                     if (wynikProcent !== null) {
-                    if (u.poprawne !== undefined && u.wybory) {
+                        if (u.poprawne !== undefined && u.wybory) {
 
-                    let zdany = (u.poprawne / u.wybory.length) >= (65 / 75);
+                            let zdany = (u.poprawne / u.wybory.length) >= (65 / 75);
 
-                    if (zdany) {
-                        kolorBadge = "#10b981";
-                    } else {
-                        kolorBadge = "#ef4444";
+                            if (zdany) {
+                                kolorBadge = "#10b981";
+                            } else {
+                                kolorBadge = "#ef4444";
+                            }
+                        }
                     }
-                }
-}
 
                     html += `
                         <div class="card">
@@ -304,8 +307,8 @@
             let wynikProcent = u.procent !== undefined ? Number(u.procent) : null;
             let wynikPoprawne = u.poprawne !== undefined ? u.poprawne : "-";
             let statusEgzaminu = (u.poprawne / u.wybory.length) >= (65 / 75)
-            ? "<b style='color:#4ade80;'>ZDAŁ ✓</b>"
-            : "<b style='color:#f87171;'>NEGATYWNY ✗</b>";
+                ? "<b style='color:#4ade80;'>ZDAŁ ✓</b>"
+                : "<b style='color:#f87171;'>NEGATYWNY ✗</b>";
 
             let html = `<h3>👤 Kandydat: ${u.gracz}</h3>`;
             html += `<p><b>Arkusz:</b> ${kodZestawu} | <b>Wynik końcowy:</b> ${statusEgzaminu}</p>`;
