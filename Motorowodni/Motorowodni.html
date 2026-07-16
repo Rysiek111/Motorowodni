@@ -401,7 +401,7 @@
                     zestaw: wybranyZestaw,
                     wybory: wybory,
                     poprawne: poprawne,
-                    procent: Math.round((poprawne / pytania.length) * 100),
+                    procent: Number(((poprawne / pytania.length) * 100).toFixed(2)),
                     data: new Date()
                 });
 
@@ -419,8 +419,13 @@
                     `;
                 });
 
-                let czyZdal = procent >= 86.67;
-                let statusEgzaminu = czyZdal ? "<span style='color:#4ade80; text-shadow: 0 0 10px rgba(74, 222, 128, 0.4);'>ZALICZONY ✓</span>" : "<span style='color:#f87171;'>NIEZALICZONY ✗</span>";
+                let procent = Math.round((poprawne / pytania.length) * 100);
+
+                let czyZdal = (poprawne / pytania.length) >= (65 / 75);
+
+                let statusEgzaminu = czyZdal
+                    ? "<span style='color:#4ade80; text-shadow: 0 0 10px rgba(74, 222, 128, 0.4);'>ZALICZONY ✓</span>"
+                    : "<span style='color:#f87171;'>NIEZALICZONY ✗</span>";
 
                 appDiv.innerHTML = `
                     <div style="text-align:center;" class="fade">
