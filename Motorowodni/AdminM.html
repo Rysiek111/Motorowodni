@@ -246,7 +246,7 @@
                         date = new Date(u.data.seconds * 1000).toLocaleString();
                     }
 
-                    let wynikProcent = u.procent !== undefined ? u.procent + "%" : "-";
+                    let wynikProcent = u.procent !== undefined ? Number(u.procent) : null;
                     let wynikPoprawne = u.poprawne !== undefined ? u.poprawne : null;
                     let wyswietlanePoprawne = wynikPoprawne !== null ? wynikPoprawne : "-";
                     let kodZestawu = u.zestaw;
@@ -254,18 +254,18 @@
                     // Próg zaliczenia: zielony od 65 poprawnych odpowiedzi na 75 pytań
                     let kolorBadge = "#64748b";
                     if (wynikProcent !== null) {
-                        if (wynikProcent >= 86.67) {
-                            kolorBadge = "#10b981";
-                        } else {
-                            kolorBadge = "#ef4444";
-                        }
-                    }
+    if (wynikProcent >= 86.67) {
+        kolorBadge = "#10b981";
+    } else {
+        kolorBadge = "#ef4444";
+    }
+}
 
                     html += `
                         <div class="card">
                             <b>${u.gracz}</b> <span style="color:#94a3b8; font-size:0.9em;">(${kodZestawu})</span>
                             <span class="score-badge" style="background-color: ${kolorBadge};">
-                                ${wynikProcent} (${wyswietlanePoprawne} popr.)
+                                ${wynikProcent !== null ? wynikProcent.toFixed(2) + "%" : "-"} (${wyswietlanePoprawne} popr.)
                             </span><br>
                             <small>${date}</small><br><br>
                             <button onclick="showProfile('${u.id}')">Profil</button>
@@ -296,7 +296,7 @@
                 console.error("Błąd ładowania struktury pytań:", err);
             }
 
-            let wynikProcent = u.procent !== undefined ? u.procent + "%" : "-";
+            let wynikProcent = u.procent !== undefined ? Number(u.procent) : null;
             let wynikPoprawne = u.poprawne !== undefined ? u.poprawne : "-";
             let statusEgzaminu = u.procent >= 86.67 ? "<b style='color:#4ade80;'>ZDAŁ ✓</b>" : "<b style='color:#f87171;'>NEGATYWNY ✗</b>";
 
