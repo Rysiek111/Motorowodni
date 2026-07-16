@@ -71,15 +71,16 @@
 
     <div class="section">
         <h2>🟦 Dashboard</h2>
+
         <p>Kandydaci: <span id="count">0</span></p>
         <p>Testy dziś: <span id="today">0</span></p>
-        <p>Najtrudniejsze pytanie:</p>
-        <div id="hardestQuestion" style="
-    background:#334155;
-    padding:10px;
-    border-radius:8px;
-    margin-top:8px;">
-            Liczenie...
+
+        <hr style="border-color:#334155;">
+
+        <h3>📉 TOP 5 najtrudniejszych pytań</h3>
+
+        <div id="hardestQuestions">
+            Ładowanie...
         </div>
     </div>
 
@@ -135,7 +136,9 @@
         }
 
         function renderDashboard() {
+
             document.getElementById("count").innerText = allData.length;
+
             let today = new Date().toDateString();
 
             let todayCount = allData.filter(d => {
@@ -144,9 +147,15 @@
             }).length;
 
             document.getElementById("today").innerText = todayCount;
+
+            // ===========================
+            // Statystyki pytań
+            // ===========================
+
             let statystyki = {};
 
             allData.forEach(u => {
+
                 if (!u.wybory) return;
 
                 u.wybory.forEach(w => {
@@ -155,6 +164,7 @@
 
                     if (!statystyki[nr]) {
                         statystyki[nr] = {
+                            numer: nr,
                             tresc: w.pytanie,
                             wszystkie: 0,
                             bledne: 0
@@ -165,8 +175,63 @@
 
                     if (!w.wynik)
                         statystyki[nr].bledne++;
+
                 });
+
             });
+
+            let ranking = Object.values(statystyki);
+
+            ranking.sort((a, b) => {
+
+                let procA = a.bledne / a.wszystkie;
+                let procB = b.bledne / b.wszystkie;
+
+                return procB - procA;
+
+            });
+
+            ranking = ranking.slice(0, 5);
+
+            let html = "";
+
+            ranking.forEach((p, i) => {
+
+                let medal = "";
+
+                if (i === 0) medal = "🥇";
+                else if (i === 1) medal = "🥈";
+                else if (i === 2) medal = "🥉";
+                else medal = `${i + 1}.`;
+
+                let procent = Math.round((p.bledne / p.wszystkie) * 100);
+
+                html += `
+        <div style="
+            background:#334155;
+            margin-bottom:10px;
+            padding:12px;
+            border-radius:10px;
+        ">
+
+            <b>${medal} Pytanie ${p.numer}</b><br><br>
+
+            ${p.tresc}<br><br>
+
+            ❌ <b>${p.bledne}</b> błędnych odpowiedzi z
+            <b>${p.wszystkie}</b>
+            (${procent}%)
+
+        </div>
+        `;
+
+            });
+
+            if (html === "")
+                html = "Brak danych.";
+
+            document.getElementById("hardestQuestions").innerHTML = html;
+
         }
 
         function renderUsers() {
