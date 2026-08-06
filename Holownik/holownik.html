@@ -20,7 +20,8 @@
         .box {
             width: 100%;
             max-width: 720px;
-            background: rgba(30, 41, 59, 0.9);
+            background: rgba(16, 29, 46, 0.95);
+            border: 1px solid rgba(56, 189, 248, .2);
             border-radius: 16px;
             padding: 30px;
             color: white;
@@ -48,8 +49,9 @@
             margin: 8px 0;
             border: none;
             border-radius: 10px;
-            background: #334155;
-            color: white;
+            background: #152942;
+            border: 1px solid rgba(56, 189, 248, .3);
+            color: #38bdf8;
             font-size: 15px;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -150,7 +152,7 @@
             height: auto;
             margin: 0 auto 20px auto;
             border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
         .fade {
@@ -162,6 +164,7 @@
                 opacity: 0;
                 transform: translateY(8px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -177,6 +180,7 @@
                 opacity: 0;
                 transform: translateY(15px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -212,127 +216,152 @@
         // 📌 PYTANIA
         let pytania = [
             {
+                "id": 1,
                 "tresc": "Podczas holowania narciarz podniósł kciuk do góry, oznacza to:",
                 "odp": ["Jedź do domu", "Zwiększ prędkość", "Wszystko w porządku"],
                 "poprawna": 1
             },
             {
+                "id": 2,
                 "tresc": "Holowany narciarz widzi wyciągniętą poziomo rękę obserwatora z lewej burty, oznacza to:",
                 "odp": ["Trzymaj się lewej burty", "Zmniejszamy prędkość", "Łódź skręca w lewo"],
                 "poprawna": 0
             },
             {
+                "id": 3,
                 "tresc": "W jaki sposób zakończysz jazdę holowanego?",
-                "odp": ["Przez wolne wytracanie prędkości", "Przez zdecydowane zdjęcie obrotów manetką", "Przez gwałturny zwrot"],
+                "odp": ["Przez wolne wytracanie prędkości", "Przez zdecydowane zdjęcie obrotów manetką", "Przez gwałtowny zwrot"],
                 "poprawna": 0
             },
             {
+                "id": 4,
                 "tresc": "W jaki sposób narciarz lub inny holowany na obiekcie nawodnym sygnalizuje powrót do bazy?",
                 "odp": ["Porusza dłonią uniesioną nad głową", "Kciukiem ręki skierowanym w dół", "Wskazuje wyciągniętą rękę w kierunku bazy"],
                 "poprawna": 0
             },
             {
+                "id": 5,
                 "tresc": "Holowany narciarz lub inny holowany na obiektach nawodnych po wywrotce uniósł złączone ręce w górę, oznacza to:",
                 "odp": ["Potrzebuję pomocy", "Uwaga, niebezpieczeństwo zafalowania", "Chcę kontynuować jazdę"],
                 "poprawna": 2
             },
             {
+                "id": 6,
                 "tresc": "Z jaką prędkością należy holować narciarza?",
                 "odp": ["30km/godz.", "40km/godz.", "W zależności od umiejętności i kondycji narciarza"],
                 "poprawna": 2
             },
             {
+                "id": 7,
                 "tresc": "Człowiek znajdujący się w wodzie o temperaturze 10°C może przeżyć:",
                 "odp": ["12 godzin", "6 godzin", "2-3 godzin"],
                 "poprawna": 2
             },
             {
+                "id": 8,
                 "tresc": "Jaka jest przyczyna upadku holowanego narciarza na plecy?",
                 "odp": ["Za szybka jazda", "Wyprostowane kolana", "Za wysoko uniesiony drążek holowniczy"],
                 "poprawna": 2
             },
             {
+                "id": 9,
                 "tresc": "Podczas startu narciarza z wody powinien on trzymać ręce:",
                 "odp": ["Wyprostowane", "Zgięte w łokciach pod kątem prostym", "Zgięte w łokciach i dociągnięte do klatki piersiowej"],
                 "poprawna": 1
             },
             {
+                "id": 10,
                 "tresc": "Co oznacza przedstawiony znak?",
                 "obrazek": "znak_narciarstwo.png",
                 "odp": ["Zezwolenie na uprawianie narciarstwa wodnego oraz holowanie statków powietrznych za statkiem", "Akwen wyłącznie do uprawiania narciarstwa wodnego oraz holowania statków powietrznych za statkiem", "Zakaz holowania narciarzy wodnych"],
                 "poprawna": 0
             },
             {
+                "id": 11,
                 "tresc": "Co oznacza gwałtowne podnoszenie i opuszczanie ręki przez sternika?",
                 "odp": ["Puść linę", "Trzymaj się w kilwaterze", "Uważaj, zwalniamy prędkość"],
                 "poprawna": 0
             },
             {
+                "id": 12,
                 "tresc": "Co oznacza uniesienie ręki sternika w górę?",
                 "odp": ["Sternik informuje holowanego – powrót do domu", "Sternik informuje holowanego – uwaga niebezpieczeństwo, zostań w śladzie łodzi", "Koniec pływania – odrzuć drążek"],
                 "poprawna": 1
             },
             {
+                "id": 13,
                 "tresc": "Wskazana szerokość drążka holującego to:",
                 "odp": ["15-24 cm", "24-36 cm", "37-55 cm"],
                 "poprawna": 1
             },
             {
+                "id": 14,
                 "tresc": "Lina holownicza powinna być:",
                 "odp": ["Tonąca", "Pływająca", "Rozcinająca"],
                 "poprawna": 1
             },
             {
+                "id": 15,
                 "tresc": "Rozpoczęcie holowania banana, koła lub innych dmuchawców powinno się zacząć:",
                 "odp": ["Przy luźnej linie holowniczej", "Przy linie częściowo sklarowanej", "Przy linie naprężonej"],
                 "poprawna": 2
             },
             {
+                "id": 16,
                 "tresc": "Kto jest prawnie odpowiedzialny za wypadek podczas holowania narciarza lub innych obiektów pływających?",
                 "odp": ["Obserwator razem z narciarzem", "Sternik", "Sternik razem z obserwatorem"],
                 "poprawna": 1
             },
             {
+                "id": 17,
                 "tresc": "Jaka musi być minimalna szerokość akwenu z bezpieczną wodą do holowania narciarza lub innych obiektów pływających?",
                 "odp": ["30 metrów", "60 metrów", "50 metrów"],
                 "poprawna": 2
             },
             {
+                "id": 18,
                 "tresc": "Kto może prowadzić jednostkę podczas holowania?",
                 "odp": ["Posiadające patent minimum sternika motorowodnego i ukończone 14 lat", "Posiadające patent minimum sternika motorowodnego i ukończone 16 lat", "Posiadające patent minimum sternika motorowodnego i ukończone 18 lat"],
                 "poprawna": 2
             },
             {
+                "id": 19,
                 "tresc": "Przyczyna upadku narciarza na twarz to:",
                 "odp": ["Za szybka jazda", "Złamanie w pasie", "Za wysoko trzymany hol"],
                 "poprawna": 1
             },
             {
+                "id": 20,
                 "tresc": "Z jaką prędkością holujemy dmuchawca?",
                 "odp": ["50km/h", "40km/h", "Bezpieczną, określoną przez producenta"],
                 "poprawna": 2
             },
             {
+                "id": 21,
                 "tresc": "Holowanie narciarza i innych obiektów pływających po zmroku jest:",
                 "odp": ["Dozwolone przy dodatkowym oświetleniu łodzi", "Dozwolone przy dodatkowym oświetleniu łodzi umieszczonym na rufie", "Bezwzględnie zabronione"],
                 "poprawna": 2
             },
             {
+                "id": 22,
                 "tresc": "Wskazana średnica drążka holowniczego to:",
                 "odp": ["1,3cm – 1,8cm", "1,7cm – 2,2cm", "2,5cm – 2,8cm"],
                 "poprawna": 2
             },
             {
+                "id": 23,
                 "tresc": "Minimalna szerokość akwenu z bezpieczną wodą w miejscu zawracania łodzi z holowanym narciarzem lub innym obiektem pływającym musi wynosić:",
                 "odp": ["100 metrów", "150 metrów", "200 metrów"],
                 "poprawna": 1
             },
             {
+                "id": 24,
                 "tresc": "Kiedy holowany narciarz musi mieć założony kapok lub inny środek asekuracyjny?",
                 "odp": ["Przy złej pogodzie", "Zawsze", "W zależności od umiejętności"],
                 "poprawna": 1
             },
             {
+                "id": 25,
                 "tresc": "Jaką jednostką holowanie narciarza jest zabronione?",
                 "odp": ["Jednostką sterowaną rumplem", "Jednostką sterowanego kołem sterowym", "Skuterem wodnym"],
                 "poprawna": 0
@@ -406,13 +435,17 @@
                 return;
             }
 
+            pytania = [...pytania];
+            pytania.forEach(p => {
+                delete p.odpowiedziLosowe;
+            });
             shuffle(pytania);
             index = 0;
             wybory = [];
             poprawne = 0;
-            pytania.forEach(p => { 
-                p.odpowiedziLosowe = [...p.odp].map((x, i) => ({ tekst: x, idx: i })); 
-                shuffle(p.odpowiedziLosowe); 
+            pytania.forEach(p => {
+                p.odpowiedziLosowe = [...p.odp].map((x, i) => ({ tekst: x, idx: i }));
+                shuffle(p.odpowiedziLosowe);
             });
             pokazPytanie();
         }
@@ -466,10 +499,19 @@
             if (czyPoprawna) poprawne++;
 
             wybory.push({
-                NumerPytania: index + 1,
+
+                IDPytania: p.id || null,
+
+                NumerEgzaminu: index + 1,
+
                 pytanie: p.tresc,
+
+                obrazek: p.obrazek || "",
+
                 odpowiedz: p.odp[i],
+
                 poprawna: p.odp[p.poprawna],
+
                 wynik: czyPoprawna
             });
 
@@ -482,6 +524,7 @@
                 // 📝 Zmiana nazwy kolekcji z "wyniki" na "holownik"
                 await addDoc(collection(db, "holownik"), {
                     gracz: daneGracza,
+                    egzamin: "Licencja Holownika",
                     wybory: wybory,
                     poprawne: poprawne,
                     procent: Math.round((poprawne / pytania.length) * 100),
@@ -493,7 +536,18 @@
                 wybory.forEach((w) => {
                     podsumowanieSzczegolowe += `
                         <div style="text-align: left; background: #334155; padding: 15px; border-radius: 8px; margin-bottom: 12px; border-left: 5px solid ${w.wynik ? '#34d399' : '#f87171'}">
-                            <p style="margin: 0 0 8px 0; font-weight: bold; font-size: 15px;">Pytanie ${w.NumerPytania}: ${w.pytanie}</p>
+                            <p style="margin: 0 0 8px 0; font-weight: bold; font-size: 15px;">Pytanie ${w.NumerEgzaminu}: ${w.pytanie}</p>
+                            ${w.obrazek ?
+                            `
+<img src="${w.obrazek}"
+style="
+max-width:250px;
+display:block;
+margin:10px auto;
+border-radius:8px;
+box-shadow:0 4px 15px rgba(0,0,0,.5);">
+`
+                            : ""}
                             <p style="margin: 4px 0; font-size: 14px; color: ${w.wynik ? '#34d399' : '#f87171'}">
                                 <strong>Twoja odpowiedź:</strong> ${w.odpowiedz} ${w.wynik ? '✓' : '✗'}
                             </p>
@@ -502,14 +556,26 @@
                     `;
                 });
 
+                let procent = Math.round((poprawne / pytania.length) * 100);
+
+                let zaliczony = (poprawne / pytania.length) >= 0.65;
+
+                let status = zaliczony
+                    ? `<span style="color:#4ade80;text-shadow:0 0 10px rgba(74,222,128,.4)">ZALICZONY ✓</span>`
+                    : `<span style="color:#f87171">NIEZALICZONY ✗</span>`;
+
                 appDiv.innerHTML = `
                     <div style="text-align:center;" class="fade">
                         <h2>Test zakończony!</h2>
                         <p style="font-size: 18px; color: #cbd5e1;"><strong>${daneGracza}</strong></p>
-                        <h2 style="color: #38bdf8; margin-top: 10px; margin-bottom: 25px;">
-                            Twój wynik: ${poprawne} / ${pytania.length}<br>
-                            Procent: ${Math.round((poprawne / pytania.length) * 100)}%
-                        </h2>
+                        <h2>
+${status}
+</h2>
+
+<h2 style="color:#38bdf8;">
+Twój wynik: ${poprawne} / ${pytania.length}<br>
+Procent: ${procent}%
+</h2>
                         
                         <div style="max-height: 400px; overflow-y: auto; margin-bottom: 20px; padding-right: 5px;">
                             ${podsumowanieSzczegolowe}
@@ -520,7 +586,7 @@
                 `;
 
                 // Dostosowanie wysokości okna jeśli ekran jest zbyt mały na przewijaną listę
-                if(window.innerHeight < 800) {
+                if (window.innerHeight < 800) {
                     document.body.style.height = "auto";
                     document.body.style.padding = "20px 0";
                 }
