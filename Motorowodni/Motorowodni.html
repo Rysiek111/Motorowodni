@@ -9,27 +9,28 @@
     <style>
         body {
             margin: 0;
-            background: linear-gradient(135deg, #07111e, #0c1a2c);
-            /* Głęboka, nocna toń oceanu */
-            font-family: "Inter", Arial;
+            background: linear-gradient(135deg,
+                    #f06e0c 22%,
+                    #1F1A17 48%,
+                    #000000 75%);
+            font-family: "Inter", Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
         }
 
         .box {
             width: 100%;
             max-width: 900px;
-            background: rgba(16, 29, 46, 0.95);
-            /* Ciemny, elegancki kokpit */
-            border: 1px solid rgba(56, 189, 248, 0.2);
-            /* Delikatna, neonowa ramka */
+            background: rgba(31, 26, 23, 0.96);
+            border: 1px solid rgba(230, 120, 23, 0.3);
             border-radius: 16px;
             padding: 30px;
-            color: #e2e8f0;
-            /* Jasnoszary tekst, idealny do czytania w ciemności */
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7), 0 0 40px rgba(56, 189, 248, 0.05);
+            color: #F5F1ED;
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.7),
+                0 0 30px rgba(230, 120, 23, 0.05);
             backdrop-filter: blur(10px);
             box-sizing: border-box;
         }
@@ -37,30 +38,27 @@
         h1 {
             text-align: center;
             margin-bottom: 25px;
-            color: #38bdf8;
-            /* Turkusowy neon na głównym nagłówku */
+            color: #E67817;
             letter-spacing: 2px;
             font-weight: 800;
-            text-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+            text-shadow: 0 0 10px rgba(230, 120, 23, 0.25);
         }
 
         h2 {
             font-size: 22px;
             line-height: 1.4;
             margin-bottom: 20px;
-            color: #f1f5f9;
+            color: #F5F1ED;
         }
 
         button {
             width: 100%;
             padding: 14px;
             margin: 8px 0;
-            border: 1px solid rgba(56, 189, 248, 0.3);
+            border: 1px solid rgba(230, 120, 23, 0.3);
             border-radius: 10px;
-            background: #152942;
-            /* Ciemnoniebieski przycisk bazowy */
-            color: #38bdf8;
-            /* Tekst świecący na turkusowo */
+            background: #2A211B;
+            color: #E67817;
             font-size: 15px;
             font-weight: 600;
             cursor: pointer;
@@ -68,9 +66,9 @@
         }
 
         button:disabled {
-            background: #0b1524;
-            color: #334155;
-            border-color: rgba(51, 65, 85, 0.3);
+            background: #151210;
+            color: #665B52;
+            border-color: rgba(102, 91, 82, 0.3);
             cursor: not-allowed;
             transform: none !important;
         }
@@ -80,25 +78,25 @@
         }
 
         button:hover:not(:disabled) {
-            background: #38bdf8;
-            /* Podświetlenie przycisku */
-            color: #07111e;
-            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+            background: #E67817;
+            color: #1F1A17;
+            border-color: #E67817;
+            box-shadow: 0 0 15px rgba(230, 120, 23, 0.35);
             transform: translateY(-2px);
         }
 
         .input-label {
             display: block;
             margin-bottom: 8px;
-            color: #94a3b8;
+            color: #B5A79D;
             font-size: 14px;
         }
 
         .input-wrapper {
             display: flex;
             align-items: center;
-            background: #0b1524;
-            border: 2px solid #1e293b;
+            background: #151210;
+            border: 2px solid #403127;
             border-radius: 10px;
             padding: 4px 12px;
             transition: all 0.2s ease;
@@ -106,22 +104,22 @@
         }
 
         .input-wrapper:focus-within {
-            border-color: #38bdf8;
-            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+            border-color: #E67817;
+            box-shadow: 0 0 0 3px rgba(230, 120, 23, 0.15);
         }
 
         .icon {
             margin-right: 10px;
             font-size: 18px;
             user-select: none;
-            filter: drop-shadow(0 0 2px rgba(56, 189, 248, 0.5));
+            filter: drop-shadow(0 0 2px rgba(230, 120, 23, 0.4));
         }
 
         input {
             width: 100%;
             border: none;
             background: transparent;
-            color: #f1f5f9;
+            color: #F5F1ED;
             font-size: 16px;
             padding: 10px 0;
             font-family: inherit;
@@ -132,20 +130,20 @@
         }
 
         input::placeholder {
-            color: #475569;
+            color: #776B61;
         }
 
         .error {
             margin-top: 6px;
             font-size: 13px;
-            color: #f87171;
+            color: #F87171;
             min-height: 20px;
             font-weight: 500;
         }
 
         .progress {
             height: 6px;
-            background: #0b1524;
+            background: #100D0B;
             border-radius: 10px;
             margin-bottom: 25px;
             overflow: hidden;
@@ -153,8 +151,11 @@
 
         .progress-inner {
             height: 100%;
-            background: linear-gradient(90deg, #0284c7, #38bdf8);
-            box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
+            background: linear-gradient(90deg,
+                    #A94F0A,
+                    #CC6815,
+                    #E67817);
+            box-shadow: 0 0 8px rgba(230, 120, 23, 0.45);
             transition: width 0.3s ease;
         }
 
@@ -233,7 +234,7 @@
         let wybranyZestaw = "";
 
         const dostepneZestawy = [
-            "ZESTAW_1aHL", 
+            "ZESTAW_1aHL",
             "ZESTAW_2aHL",
             "ZESTAW_3aHL"
         ];

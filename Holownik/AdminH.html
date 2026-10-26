@@ -9,60 +9,116 @@
     <style>
         body {
             margin: 0;
-            font-family: Arial;
-            background: #0f172a;
-            color: white;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #382313 0%, #1F1A17 45%, #000000 100%);
+            color: #F5F1ED;
             padding: 20px;
+            min-height: 100vh;
+            box-sizing: border-box;
         }
 
         h1 {
-            color: #38bdf8;
+            color: #E67817;
+            text-shadow: 0 0 10px rgba(230, 120, 23, 0.2);
         }
 
         .section {
-            background: #1e293b;
+            background: rgba(31, 26, 23, 0.96);
             padding: 15px;
+            border: 1px solid rgba(230, 120, 23, 0.2);
             border-radius: 12px;
             margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
         }
 
         button {
             padding: 8px 12px;
-            border: none;
+            border: 1px solid rgba(230, 120, 23, 0.3);
             border-radius: 8px;
-            background: #334155;
-            color: white;
+            background: #2A211B;
+            color: #E67817;
             cursor: pointer;
+            transition: all 0.2s ease;
         }
 
         button:hover {
-            background: #38bdf8;
-            color: black;
+            background: #E67817;
+            color: #1F1A17;
+            border-color: #E67817;
+            box-shadow: 0 0 10px rgba(230, 120, 23, 0.25);
         }
 
         .delete {
-            background: #ef4444;
+            background: #8F351B;
+            color: #FFFFFF;
+            border-color: #8F351B;
             margin-top: 10px;
         }
 
         .delete:hover {
-            background: #dc2626;
+            background: #B94720;
+            color: #FFFFFF;
+            border-color: #B94720;
+            box-shadow: 0 0 10px rgba(185, 71, 32, 0.3);
         }
 
         .card {
             padding: 10px;
-            border-bottom: 1px solid #334155;
+            border-bottom: 1px solid #403127;
         }
 
-        /* Styl dla wyróżnienia wyników kandydata na liście */
         .score-badge {
-            color: white;
+            color: #FFFFFF;
             padding: 2px 6px;
             border-radius: 4px;
             font-size: 0.85em;
             font-weight: bold;
             margin-left: 5px;
             display: inline-block;
+        }
+
+        .search-input {
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(230, 120, 23, 0.25);
+            background: #241C17;
+            color: #F5F1ED;
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: #E67817;
+            box-shadow: 0 0 0 2px rgba(230, 120, 23, 0.12);
+        }
+
+        .search-input::placeholder {
+            color: #B8A99C;
+        }
+
+        .profile-question {
+            margin-bottom: 14px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed #403127;
+        }
+
+        .profile-question p {
+            margin: 0 0 4px 0;
+        }
+
+        .profile-question img {
+            max-width: 140px;
+            border-radius: 6px;
+            margin: 8px 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #403127;
         }
     </style>
 </head>
@@ -79,8 +135,7 @@
 
     <div class="section">
         <h2>🟨 Lista Egzaminowanych</h2>
-        <input id="search" placeholder="Szukaj kandydata..."
-            style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px; border:none;">
+        <input id="search" class="search-input" placeholder="Szukaj kandydata...">
         <div id="users"></div>
     </div>
 
@@ -90,7 +145,6 @@
     </div>
 
     <script type="module">
-
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getFirestore, getDocs, collection, deleteDoc, doc }
             from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -104,7 +158,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Baza pytań do sprawdzania poprawności odpowiedzi w profilu
+        // Baza pytan do sprawdzania poprawnosci odpowiedzi w profilu
         const pytania = [
             {
                 "tresc": "Podczas holowania narciarz podniósł kciuk do góry, oznacza to:",
@@ -238,7 +292,7 @@
 
         async function load() {
             const snap = await getDocs(collection(db, "holownik"));
-            
+
             document.getElementById("search").removeEventListener("input", renderUsers);
             document.getElementById("search").addEventListener("input", renderUsers);
 
@@ -246,7 +300,6 @@
 
             snap.forEach(docSnap => {
                 let d = docSnap.data();
-
                 allData.push({
                     id: docSnap.id,
                     ...d
@@ -261,7 +314,6 @@
             document.getElementById("count").innerText = allData.length;
 
             let today = new Date().toDateString();
-
             let todayCount = allData.filter(d => {
                 if (!d.data) return false;
                 return new Date(d.data.seconds * 1000).toDateString() === today;
@@ -286,24 +338,23 @@
                     let wynikPoprawne = u.poprawne !== undefined ? u.poprawne : null;
                     let wyswietlanePoprawne = wynikPoprawne !== null ? wynikPoprawne : "-";
 
-                    // --- KOLOROWANIE OD PUNKTY >= 20 ---
-                    let kolorBadge = "#64748b"; 
-
+                    // Kolor wyniku: zielony od 20 poprawnych odpowiedzi
+                    let kolorBadge = "#64748b";
                     if (wynikPoprawne !== null) {
                         if (wynikPoprawne >= 20) {
-                            kolorBadge = "#10b981"; // Zielony
+                            kolorBadge = "#10b981";
                         } else {
-                            kolorBadge = "#ef4444"; // Czerwony
+                            kolorBadge = "#ef4444";
                         }
                     }
 
                     html += `
                         <div class="card">
-                            <b>${u.gracz}</b> 
+                            <b>${u.gracz}</b>
                             <span class="score-badge" style="background-color: ${kolorBadge};">
                                 ${wynikProcent} (${wyswietlanePoprawne} popr.)
                             </span><br>
-                            <small>${date}</small><br><br>
+                            <small>🕒 ${date}</small><br><br>
                             <button onclick="showProfile('${u.id}')">Profil</button>
                             <button class="delete" onclick="deleteUser('${u.id}')">Usuń</button>
                         </div>
@@ -325,38 +376,41 @@
 
             if (u.wybory && Array.isArray(u.wybory)) {
                 u.wybory.forEach((w, j) => {
-                    
-                    // 1. Próbujemy dopasować pytanie z bazy na podstawie tekstu pytania lub NumerPytania (indeksu)
+                    // Dopasowanie pytania po tresci lub numerze pytania
                     let pytanieObj = null;
                     if (w.pytanie) {
                         pytanieObj = pytania.find(p => p.tresc === w.pytanie);
                     } else if (w.NumerPytania !== undefined) {
-                        // Jeśli w bazie zapisujesz np. NumerPytania: 1, to w tablicy JS ma indeks 0 (NumerPytania - 1)
                         pytanieObj = pytania[w.NumerPytania - 1] || pytania[w.NumerPytania];
                     }
 
                     let trescPytania = w.pytanie || (pytanieObj ? pytanieObj.tresc : `Pytanie ${j + 1}`);
                     let odpowiedzKandydata = w.odpowiedz || "Brak odpowiedzi";
 
-                    // 2. Weryfikacja poprawności i dobór koloru
-                    let kolorOdpowiedzi = "white"; // Domyślny kolor tekstu
+                    let kolorOdpowiedzi = "white";
                     let podpowiedzPrawidlowej = "";
+                    let imgHtml = "";
 
                     if (pytanieObj) {
                         let tekstPoprawnejOdpowiedzi = pytanieObj.odp[pytanieObj.poprawna];
 
+                        if (pytanieObj.obrazek) {
+                            imgHtml = `<br><img src="${pytanieObj.obrazek}" alt="Ilustracja do pytania" style="max-width:140px; border-radius:6px; margin:8px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.4);">`;
+                        }
+
                         if (odpowiedzKandydata === tekstPoprawnejOdpowiedzi) {
-                            kolorOdpowiedzi = "#4ade80"; // Soczysty zielony dla poprawnej
+                            kolorOdpowiedzi = "#4ade80";
                         } else {
-                            kolorOdpowiedzi = "#f87171"; // Czerwony dla błędnej
-                            podpowiedzPrawidlowej = ` <span style="color: #94a3b8; font-size: 0.9em;">(Poprawna: ${tekstPoprawnejOdpowiedzi})</span>`;
+                            kolorOdpowiedzi = "#f87171";
+                            podpowiedzPrawidlowej = ` <span style="color: #B8A99C; font-size: 0.9em;">(Poprawna: ${tekstPoprawnejOdpowiedzi})</span>`;
                         }
                     }
 
                     html += `
-                        <p>${j + 1}. <b>${trescPytania}</b><br>
-                           Odpowiedź: <span style="color: ${kolorOdpowiedzi}; font-weight: bold;">${odpowiedzKandydata}</span>${podpowiedzPrawidlowej}
-                        </p>
+                        <div class="profile-question">
+                            <p>${j + 1}. <b>${trescPytania}</b>${imgHtml}</p>
+                            <p>Odpowiedź: <span style="color: ${kolorOdpowiedzi}; font-weight: bold;">${odpowiedzKandydata}</span>${podpowiedzPrawidlowej}</p>
+                        </div>
                     `;
                 });
             } else {
@@ -379,9 +433,7 @@
         }
 
         load();
-
     </script>
 
 </body>
-
 </html>
