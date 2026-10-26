@@ -1,3 +1,6 @@
+Dodawanie Pytań:
+    https://rysiek111.github.io/Motorowodni/Dodawanie_Pyta%C5%84.html
+
 Motorowodni:
     Test:
         https://rysiek111.github.io/Motorowodni/Motorowodni/Motorowodni.html
