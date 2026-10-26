@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zarządzanie Baza Pytań - Firebase</title>
+    <style>
+        :root {
+            --bg-color: #0d0b0a;
+            --card-bg: rgba(31, 26, 23, 0.96);
+            --accent-color: #E67817;
+            --accent-hover: #ff881a;
+            --border-color: rgba(230, 120, 23, 0.3);
+            --text-color: #F5F1ED;
+            --text-muted: #B5A79D;
+            --input-bg: #151210;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Inter", Arial, sans-serif;
+            background: linear-gradient(135deg, #f06e0c 10%, #1F1A17 40%, #000000 80%);
+            color: var(--text-color);
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Zakładki u góry */
+        .tab-navigation {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 16px 20px;
+            background: rgba(21, 18, 16, 0.85);
+            border: 2px solid #403127;
+            border-radius: 12px;
+            color: var(--text-muted);
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .tab-btn:hover {
+            border-color: var(--accent-color);
+            color: var(--text-color);
+        }
+
+        .tab-btn.active {
+            background: var(--accent-color);
+            color: #1F1A17;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 20px rgba(230, 120, 23, 0.4);
+        }
+
+        .layout-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 900px) {
+            .layout-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .box {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+        }
+
+        h2 {
+            color: var(--accent-color);
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .badge {
+            background: rgba(230, 120, 23, 0.2);
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+            font-size: 13px;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            background: var(--input-bg);
+            border: 2px solid #403127;
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 15px;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(230, 120, 23, 0.15);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .radio-item {
+            display: flex;
+            align-items: center;
+            background: var(--input-bg);
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #403127;
+        }
+
+        .radio-item input[type="radio"] {
+            width: auto;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        /* Podgląd obrazka */
+        .img-preview-container {
+            margin-top: 8px;
+            text-align: center;
+            background: #151210;
+            border: 1px dashed #403127;
+            border-radius: 8px;
+            padding: 10px;
+            display: none;
+        }
+
+        .img-preview-container img {
+            max-width: 100%;
+            max-height: 180px;
+            border-radius: 6px;
+            object-fit: contain;
+        }
+
+        .img-preview-status {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        .btn-main {
+            width: 100%;
+            padding: 14px;
+            margin-top: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: var(--accent-color);
+            color: #1F1A17;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .btn-main:hover:not(:disabled) {
+            background: var(--accent-hover);
+            box-shadow: 0 0 15px rgba(230, 120, 23, 0.35);
+            transform: translateY(-2px);
+        }
+
+        .btn-main:disabled {
+            background: #403127;
+            color: #776B61;
+            cursor: not-allowed;
+        }
+
+        .btn-cancel {
+            background: transparent;
+            border: 1px solid #f87171;
+            color: #f87171;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .btn-cancel:hover {
+            background: rgba(248, 113, 113, 0.15);
+        }
+
+        /* Lista pytań po prawej */
+        .questions-list {
+            max-height: 650px;
+            overflow-y: auto;
+            padding-right: 5px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .question-card {
+            background: #151210;
+            border: 1px solid #403127;
+            border-radius: 10px;
+            padding: 14px;
+            position: relative;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .question-title {
+            font-size: 15px;
+            color: var(--text-color);
+            padding-right: 60px;
+        }
+
+        .question-actions {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            display: flex;
+            gap: 6px;
+        }
+
+        .icon-btn {
+            background: #251e19;
+            border: 1px solid #403127;
+            color: var(--text-muted);
+            border-radius: 6px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .icon-btn.edit:hover {
+            color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+
+        .icon-btn.delete:hover {
+            color: #f87171;
+            border-color: #f87171;
+        }
+
+        .list-img-preview {
+            max-width: 100%;
+            max-height: 120px;
+            border-radius: 6px;
+            margin: 6px 0;
+            border: 1px solid #403127;
+        }
+
+        .answers-preview {
+            font-size: 13px;
+            margin-top: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .ans-item {
+            color: #A09388;
+            padding: 3px 6px;
+            border-radius: 4px;
+        }
+
+        .ans-item.correct {
+            color: #4ade80;
+            background: rgba(74, 222, 128, 0.1);
+            font-weight: 600;
+        }
+
+        #status {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+        }
+
+        .success {
+            background: rgba(74, 222, 128, 0.15);
+            color: #4ade80;
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            display: block !important;
+        }
+
+        .error {
+            background: rgba(248, 113, 113, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(248, 113, 113, 0.3);
+            display: block !important;
+        }
+
+        .empty-info {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 40px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Zakładki wyboru bazy -->
+        <div class="tab-navigation">
+            <button id="tabMotorowodni" class="tab-btn active" onclick="wybierzKategorie('baza_pytan', 'ZESTAW_1aHL', 75, this)">
+                🚤 Sternik Motorowodny
+            </button>
+            <button id="tabHolownik" class="tab-btn" onclick="wybierzKategorie('baza_pytan_holownik', 'HOLOWNIK_ZESTAW_1', 25, this)">
+                🏄 Holownik Narciarza
+            </button>
+        </div>
+
+        <div class="layout-grid">
+            <!-- Formularz edycji/dodawania -->
+            <div class="box">
+                <h2 id="formTitle">
+                    ➕ Dodaj Pytanie
+                    <span id="limitBadge" class="badge">Limit: max 75</span>
+                </h2>
+
+                <form id="questionForm" onsubmit="obsluzZapis(event)">
+                    <!-- Nazwa Zestawu -->
+                    <div class="form-group">
+                        <label for="zestawInput">Identyfikator Zestawu (Dokumentu):</label>
+                        <input id="zestawInput" type="text" required onchange="pobierzIPokazPytania()">
+                    </div>
+
+                    <!-- Treść pytania -->
+                    <div class="form-group">
+                        <label for="trescInput">Treść pytania:</label>
+                        <textarea id="trescInput" required placeholder="Wpisz treść pytania..."></textarea>
+                    </div>
+
+                    <!-- Obrazek opcjonalnie z podglądem -->
+                    <div class="form-group">
+                        <label for="obrazekInput">Nazwa pliku/Ścieżka obrazka na GitHubie (opcjonalnie):</label>
+                        <input id="obrazekInput" type="text" placeholder="np. znaki/znak1.png lub nazwa_pliku.jpg" oninput="aktualizujPodgladObrazka()">
+                        <div id="imgPreviewBox" class="img-preview-container">
+                            <img id="imgPreview" src="" alt="Podgląd">
+                            <div id="imgPreviewStatus" class="img-preview-status"></div>
+                        </div>
+                    </div>
+
+                    <!-- Odpowiedzi -->
+                    <div class="form-group">
+                        <label>Odpowiedzi (zaznacz poprawną):</label>
+                        <div class="radio-group">
+                            <div class="radio-item">
+                                <input type="radio" name="poprawna" value="0" checked>
+                                <input type="text" class="odp-input" required placeholder="Odpowiedź A">
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio" name="poprawna" value="1">
+                                <input type="text" class="odp-input" required placeholder="Odpowiedź B">
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio" name="poprawna" value="2">
+                                <input type="text" class="odp-input" required placeholder="Odpowiedź C">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="submitBtn" class="btn-main">Dodaj Pytanie do Bazy</button>
+                    <button type="button" id="cancelBtn" class="btn-main btn-cancel" onclick="anulujEdycje()">Anuluj Edycję</button>
+                </form>
+
+                <div id="status"></div>
+            </div>
+
+            <!-- Podgląd pytania w zestawie -->
+            <div class="box">
+                <h2>
+                    📋 Istniejące Pytania
+                    <span id="counterBadge" class="badge">0 pytań</span>
+                </h2>
+
+                <div id="questionsContainer" class="questions-list">
+                    <div class="empty-info">Wczytywanie pytań z Firebase...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        // =========================================================================
+        // TUTAJ WKLIM Swoją ścieżkę do obrazków na GitHubie (np. GitHub Pages lub raw)!
+        // Przykłady:
+        // - GitHub Pages: "https://twoja-nazwa.github.io/twoje-repo/"
+        // - Raw GitHub:   "https://raw.githubusercontent.com/user/repo/main/"
+        // (Zostaw puste "" jeśli w polu obrazka wklejasz zawsze pełny link HTTP)
+        // =========================================================================
+        const GITHUB_BASE_URL = ""; 
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC_c5yD2XF-mbCK1NGLYMdIk7UVKGsLxoU",
+            authDomain: "motorowodni-49c56.firebaseapp.com",
+            projectId: "motorowodni-49c56",
+            storageBucket: "motorowodni-49c56.firebasestorage.app",
+            messagingSenderId: "634414019790",
+            appId: "1:634414019790:web:0e8ffd2c0b613f3b37cc9f",
+            measurementId: "G-Z69K7SW8X3"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Stan aplikacji
+        let aktualnaKolekcja = "baza_pytan";
+        let aktualnyZestawId = "ZESTAW_1aHL";
+        let maxLimitPytan = 75;
+        let aktualnePytania = [];
+        let edytowanyIndex = -1;
+
+        // Pomocnik składający URL z GitHuba
+        function uzyskajURLGitHub(path) {
+            if (!path) return "";
+            if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("data:")) {
+                return path;
+            }
+            // Doklejanie prefiksu GitHub, jeśli jest zdefiniowany
+            const cleanBase = GITHUB_BASE_URL.endsWith('/') ? GITHUB_BASE_URL : GITHUB_BASE_URL + '/';
+            const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+            return GITHUB_BASE_URL ? cleanBase + cleanPath : cleanPath;
+        }
+
+        // Przełączanie zakładki
+        window.wybierzKategorie = function(kolekcja, domyslnyZestaw, limit, elementPrzycisk) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            elementPrzycisk.classList.add('active');
+
+            aktualnaKolekcja = kolekcja;
+            aktualnyZestawId = domyslnyZestaw;
+            maxLimitPytan = limit;
+
+            document.getElementById("zestawInput").value = domyslnyZestaw;
+            document.getElementById("limitBadge").textContent = `Limit: max ${limit}`;
+            
+            anulujEdycje();
+            pobierzIPokazPytania();
+        };
+
+        // Aktualizacja podglądu obrazka w formularzu
+        window.aktualizujPodgladObrazka = function() {
+            const inputVal = document.getElementById("obrazekInput").value.trim();
+            const box = document.getElementById("imgPreviewBox");
+            const img = document.getElementById("imgPreview");
+            const status = document.getElementById("imgPreviewStatus");
+
+            if (!inputVal) {
+                box.style.display = "none";
+                return;
+            }
+
+            box.style.display = "block";
+            status.textContent = "Ładowanie podglądu...";
+            img.style.display = "none";
+
+            const finalUrl = uzyskajURLGitHub(inputVal);
+
+            img.onload = () => {
+                img.style.display = "inline-block";
+                status.textContent = "";
+            };
+            img.onerror = () => {
+                img.style.display = "none";
+                status.textContent = "❌ Nie znaleziono obrazka pod adresem: " + finalUrl;
+            };
+            img.src = finalUrl;
+        };
+
+        // Pobieranie pytań z Firestore
+        window.pobierzIPokazPytania = async function() {
+            const container = document.getElementById("questionsContainer");
+            const zestawId = document.getElementById("zestawInput").value.trim();
+            aktualnyZestawId = zestawId;
+
+            if (!zestawId) {
+                container.innerHTML = `<div class="empty-info">Podaj nazwę zestawu, aby wczytać pytania.</div>`;
+                return;
+            }
+
+            container.innerHTML = `<div class="empty-info">Wczytywanie...</div>`;
+
+            try {
+                const docRef = doc(db, aktualnaKolekcja, zestawId);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists() && docSnap.data().pytania) {
+                    aktualnePytania = docSnap.data().pytania;
+                } else {
+                    aktualnePytania = [];
+                }
+
+                wyswietlListePytan();
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `<div class="empty-info" style="color: #f87171;">Błąd pobierania pytań: ${err.message}</div>`;
+            }
+        };
+
+        // Renderowanie listy pytań po prawej stronie
+        function wyswietlListePytan() {
+            const container = document.getElementById("questionsContainer");
+            const counterBadge = document.getElementById("counterBadge");
+
+            counterBadge.textContent = `${aktualnePytania.length} / ${maxLimitPytan} pytań`;
+
+            if (aktualnePytania.length === 0) {
+                container.innerHTML = `<div class="empty-info">Brak pytań w tym zestawie. Dodaj pierwsze!</div>`;
+                return;
+            }
+
+            container.innerHTML = aktualnePytania.map((pyt, index) => {
+                let imgHtml = "";
+                if (pyt.obrazek) {
+                    const imgUrl = uzyskajURLGitHub(pyt.obrazek);
+                    imgHtml = `<div><img class="list-img-preview" src="${imgUrl}" alt="Obrazek pytania" onerror="this.style.display='none'"></div>`;
+                }
+
+                return `
+                    <div class="question-card">
+                        <div class="question-header">
+                            <div class="question-title">${index + 1}. ${pyt.tresc}</div>
+                            <div class="question-actions">
+                                <button class="icon-btn edit" onclick="zaladujDoEdycji(${index})" title="Edytuj">✏️</button>
+                                <button class="icon-btn delete" onclick="usunPytanie(${index})" title="Usuń">🗑️</button>
+                            </div>
+                        </div>
+                        ${imgHtml}
+                        <div class="answers-preview">
+                            ${pyt.odp.map((ans, i) => `
+                                <div class="ans-item ${i === pyt.poprawna ? 'correct' : ''}">
+                                    ${String.fromCharCode(65 + i)}) ${ans} ${i === pyt.poprawna ? '✓' : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Ładowanie pytania do formularza
+        window.zaladujDoEdycji = function(index) {
+            const pyt = aktualnePytania[index];
+            if (!pyt) return;
+
+            edytowanyIndex = index;
+            document.getElementById("trescInput").value = pyt.tresc;
+            document.getElementById("obrazekInput").value = pyt.obrazek || "";
+            
+            const odpInputs = document.querySelectorAll(".odp-input");
+            pyt.odp.forEach((odpowiedzText, i) => {
+                if (odpInputs[i]) odpInputs[i].value = odpowiedzText;
+            });
+
+            const radioButtons = document.querySelectorAll('input[name="poprawna"]');
+            if (radioButtons[pyt.poprawna]) {
+                radioButtons[pyt.poprawna].checked = true;
+            }
+
+            document.getElementById("formTitle").childNodes[0].nodeValue = "✏️ Edytuj Pytanie #" + (index + 1) + " ";
+            document.getElementById("submitBtn").textContent = "Zapisz Zmiany w Pytaniu";
+            document.getElementById("cancelBtn").style.display = "block";
+
+            aktualizujPodgladObrazka();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        // Anulowanie edycji
+        window.anulujEdycje = function() {
+            edytowanyIndex = -1;
+            document.getElementById("questionForm").reset();
+            document.getElementById("formTitle").childNodes[0].nodeValue = "➕ Dodaj Pytanie ";
+            document.getElementById("submitBtn").textContent = "Dodaj Pytanie do Bazy";
+            document.getElementById("cancelBtn").style.display = "none";
+            document.getElementById("imgPreviewBox").style.display = "none";
+        };
+
+        // Usuwanie pytania
+        window.usunPytanie = async function(index) {
+            if (!confirm(`Czy na pewno chcesz usunąć pytanie nr ${index + 1}?`)) return;
+
+            aktualnePytania.splice(index, 1);
+            aktualnePytania.forEach((p, idx) => p.id = idx + 1);
+
+            await zapiszZestawDoFirebase("Pytanie zostało usunięte!");
+            if (edytowanyIndex === index) anulujEdycje();
+        };
+
+        // Obsługa zapisu (dodawanie lub edycja)
+        window.obsluzZapis = async function(e) {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById("submitBtn");
+            const tresc = document.getElementById("trescInput").value.trim();
+            const obrazek = document.getElementById("obrazekInput").value.trim();
+            const odpInputs = document.querySelectorAll(".odp-input");
+            const odpowiedzi = Array.from(odpInputs).map(i => i.value.trim());
+            const poprawnaIdx = parseInt(document.querySelector('input[name="poprawna"]:checked').value);
+
+            if (edytowanyIndex === -1 && aktualnePytania.length >= maxLimitPytan) {
+                pokazStatus(`❌ Osiągnięto limit! Ten zestaw zawiera już ${maxLimitPytan} pytań.`, "error");
+                return;
+            }
+
+            submitBtn.disabled = true;
+
+            const danePytania = {
+                id: edytowanyIndex >= 0 ? aktualnePytania[edytowanyIndex].id : aktualnePytania.length + 1,
+                tresc: tresc,
+                odp: odpowiedzi,
+                poprawna: poprawnaIdx
+            };
+
+            if (obrazek) {
+                danePytania.obrazek = obrazek;
+            }
+
+            if (edytowanyIndex >= 0) {
+                aktualnePytania[edytowanyIndex] = danePytania;
+            } else {
+                aktualnePytania.push(danePytania);
+            }
+
+            const wiadomosc = edytowanyIndex >= 0 ? "✓ Zmiany zostały zapisane!" : "✓ Pytanie dodane pomyślnie!";
+            const sukces = await zapiszZestawDoFirebase(wiadomosc);
+
+            if (sukces) {
+                anulujEdycje();
+            }
+            submitBtn.disabled = false;
+        };
+
+        // Zapis tablicy pytań do bazy
+        async function zapiszZestawDoFirebase(komunikatSukcesu) {
+            try {
+                const docRef = doc(db, aktualnaKolekcja, aktualnyZestawId);
+                await setDoc(docRef, { pytania: aktualnePytania }, { merge: true });
+                
+                pokazStatus(komunikatSukcesu, "success");
+                wyswietlListePytan();
+                return true;
+            } catch (err) {
+                console.error(err);
+                pokazStatus("Błąd zapisu w Firebase: " + err.message, "error");
+                return false;
+            }
+        }
+
+        function pokazStatus(msg, type) {
+            const statusDiv = document.getElementById("status");
+            statusDiv.className = type;
+            statusDiv.textContent = msg;
+            setTimeout(() => {
+                statusDiv.className = "";
+                statusDiv.style.display = "none";
+            }, 4000);
+        }
+
+        // Pierwsze wczytanie przy starcie
+        document.getElementById("zestawInput").value = aktualnyZestawId;
+        pobierzIPokazPytania();
+    </script>
+</body>
+
+</html>
