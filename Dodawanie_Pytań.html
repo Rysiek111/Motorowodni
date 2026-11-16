@@ -469,6 +469,10 @@
         let aktualnePytania = [];
         let edytowanyIndex = -1;
 
+        function esc(t) {
+            return String(t ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+        }
+
         // Pomocnik składający URL z GitHuba
         function uzyskajURLGitHub(path) {
             if (!path) return "";
@@ -531,6 +535,7 @@
             const container = document.getElementById("questionsContainer");
             const zestawId = document.getElementById("zestawInput").value.trim();
             aktualnyZestawId = zestawId;
+            if (edytowanyIndex !== -1) anulujEdycje();
 
             if (!zestawId) {
                 container.innerHTML = `<div class="empty-info">Podaj nazwę zestawu, aby wczytać pytania.</div>`;
@@ -572,13 +577,13 @@
                 let imgHtml = "";
                 if (pyt.obrazek) {
                     const imgUrl = uzyskajURLGitHub(pyt.obrazek);
-                    imgHtml = `<div><img class="list-img-preview" src="${imgUrl}" alt="Obrazek pytania" onerror="this.style.display='none'"></div>`;
+                    imgHtml = `<div><img class="list-img-preview" src="${esc(imgUrl)}" alt="Obrazek pytania" onerror="this.style.display='none'"></div>`;
                 }
 
                 return `
                     <div class="question-card">
                         <div class="question-header">
-                            <div class="question-title">${index + 1}. ${pyt.tresc}</div>
+                            <div class="question-title">${index + 1}. ${esc(pyt.tresc)}</div>
                             <div class="question-actions">
                                 <button class="icon-btn edit" onclick="zaladujDoEdycji(${index})" title="Edytuj">✏️</button>
                                 <button class="icon-btn delete" onclick="usunPytanie(${index})" title="Usuń">🗑️</button>
@@ -588,7 +593,7 @@
                         <div class="answers-preview">
                             ${pyt.odp.map((ans, i) => `
                                 <div class="ans-item ${i === pyt.poprawna ? 'correct' : ''}">
-                                    ${String.fromCharCode(65 + i)}) ${ans} ${i === pyt.poprawna ? '✓' : ''}
+                                    ${String.fromCharCode(65 + i)}) ${esc(ans)} ${i === pyt.poprawna ? '✓' : ''}
                                 </div>
                             `).join('')}
                         </div>
@@ -627,7 +632,10 @@
         // Anulowanie edycji
         window.anulujEdycje = function() {
             edytowanyIndex = -1;
+            const zestawInput = document.getElementById("zestawInput");
+            const zachowanyZestaw = zestawInput.value;
             document.getElementById("questionForm").reset();
+            zestawInput.value = zachowanyZestaw; // reset() nie może czyścić identyfikatora zestawu
             document.getElementById("formTitle").childNodes[0].nodeValue = "➕ Dodaj Pytanie ";
             document.getElementById("submitBtn").textContent = "Dodaj Pytanie do Bazy";
             document.getElementById("cancelBtn").style.display = "none";
@@ -641,8 +649,8 @@
             aktualnePytania.splice(index, 1);
             aktualnePytania.forEach((p, idx) => p.id = idx + 1);
 
+            anulujEdycje();
             await zapiszZestawDoFirebase("Pytanie zostało usunięte!");
-            if (edytowanyIndex === index) anulujEdycje();
         };
 
         // Obsługa zapisu (dodawanie lub edycja)
@@ -664,7 +672,7 @@
             submitBtn.disabled = true;
 
             const danePytania = {
-                id: edytowanyIndex >= 0 ? aktualnePytania[edytowanyIndex].id : aktualnePytania.length + 1,
+                id: edytowanyIndex >= 0 ? edytowanyIndex + 1 : aktualnePytania.length + 1,
                 tresc: tresc,
                 odp: odpowiedzi,
                 poprawna: poprawnaIdx
@@ -693,6 +701,10 @@
         async function zapiszZestawDoFirebase(komunikatSukcesu) {
             try {
                 const docRef = doc(db, aktualnaKolekcja, aktualnyZestawId);
+                // Numeracja od nowa + usunięcie pól undefined (Firestore ich nie przyjmuje)
+                aktualnePytania = JSON.parse(JSON.stringify(
+                    aktualnePytania.map((p, idx) => ({ ...p, id: idx + 1 }))
+                ));
                 await setDoc(docRef, { pytania: aktualnePytania }, { merge: true });
                 
                 pokazStatus(komunikatSukcesu, "success");
@@ -705,11 +717,14 @@
             }
         }
 
+        let statusTimeout = null;
         function pokazStatus(msg, type) {
             const statusDiv = document.getElementById("status");
+            clearTimeout(statusTimeout);
+            statusDiv.style.display = "";
             statusDiv.className = type;
             statusDiv.textContent = msg;
-            setTimeout(() => {
+            statusTimeout = setTimeout(() => {
                 statusDiv.className = "";
                 statusDiv.style.display = "none";
             }, 4000);
