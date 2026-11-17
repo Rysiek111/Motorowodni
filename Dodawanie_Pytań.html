@@ -429,6 +429,11 @@
                     <span id="counterBadge" class="badge">0 pytań</span>
                 </h2>
 
+                <div style="margin-bottom: 14px;">
+                    <button type="button" class="btn-main" style="margin-top:0;" onclick="document.getElementById('importFile').click()">📥 Importuj zestaw z pliku JSON</button>
+                    <input id="importFile" type="file" accept=".json,application/json" style="display:none" onchange="importujZJSON(event)">
+                </div>
+
                 <div id="questionsContainer" class="questions-list">
                     <div class="empty-info">Wczytywanie pytań z Firebase...</div>
                 </div>
@@ -472,6 +477,54 @@
         function esc(t) {
             return String(t ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
         }
+
+        // Import całego zestawu z pliku JSON (zastępuje pytania w aktualnym zestawie)
+        window.importujZJSON = async function(e) {
+            const plik = e.target.files[0];
+            e.target.value = "";
+            if (!plik) return;
+
+            let dane;
+            try {
+                dane = JSON.parse(await plik.text());
+            } catch (err) {
+                pokazStatus("❌ Plik nie jest poprawnym JSON-em: " + err.message, "error");
+                return;
+            }
+
+            if (!Array.isArray(dane) || dane.length === 0) {
+                pokazStatus("❌ JSON musi być niepustą listą pytań.", "error");
+                return;
+            }
+            if (dane.length > maxLimitPytan) {
+                pokazStatus(`❌ Plik ma ${dane.length} pytań, a limit tej bazy to ${maxLimitPytan}.`, "error");
+                return;
+            }
+            const bledne = dane.findIndex(p => !p || typeof p.tresc !== "string" || !Array.isArray(p.odp) || p.odp.length !== 3);
+            if (bledne !== -1) {
+                pokazStatus(`❌ Pytanie nr ${bledne + 1} ma zły format (potrzebne: tresc oraz dokładnie 3 odpowiedzi w odp).`, "error");
+                return;
+            }
+
+            if (!confirm(`Zastąpić zawartość zestawu "${aktualnyZestawId}" (${aktualnePytania.length} pytań) nowymi ${dane.length} pytaniami z pliku?`)) return;
+
+            const stare = aktualnePytania;
+            anulujEdycje();
+            aktualnePytania = dane.map((p, i) => {
+                const nowe = {
+                    id: i + 1,
+                    tresc: p.tresc.trim(),
+                    odp: p.odp.map(o => String(o).trim()),
+                    poprawna: Number.isInteger(p.poprawna) && p.poprawna >= 0 && p.poprawna <= 2 ? p.poprawna : null
+                };
+                // obrazek: z pliku, a jeśli go brak – zachowaj dotychczasowy z bazy (ta sama pozycja)
+                const obr = p.obrazek || (stare[i] && stare[i].obrazek);
+                if (obr) nowe.obrazek = obr;
+                return nowe;
+            });
+
+            await zapiszZestawDoFirebase(`✓ Zaimportowano ${aktualnePytania.length} pytań.`);
+        };
 
         // Pomocnik składający URL z GitHuba
         function uzyskajURLGitHub(path) {
@@ -566,7 +619,8 @@
             const container = document.getElementById("questionsContainer");
             const counterBadge = document.getElementById("counterBadge");
 
-            counterBadge.textContent = `${aktualnePytania.length} / ${maxLimitPytan} pytań`;
+            const bezPoprawnej = aktualnePytania.filter(p => !Number.isInteger(p.poprawna)).length;
+            counterBadge.textContent = `${aktualnePytania.length} / ${maxLimitPytan} pytań` + (bezPoprawnej ? ` · ⚠ ${bezPoprawnej} bez odp.` : "");
 
             if (aktualnePytania.length === 0) {
                 container.innerHTML = `<div class="empty-info">Brak pytań w tym zestawie. Dodaj pierwsze!</div>`;
@@ -583,7 +637,7 @@
                 return `
                     <div class="question-card">
                         <div class="question-header">
-                            <div class="question-title">${index + 1}. ${esc(pyt.tresc)}</div>
+                            <div class="question-title">${index + 1}. ${esc(pyt.tresc)}${Number.isInteger(pyt.poprawna) ? "" : ' <span style="color:#f87171;">⚠ zaznacz poprawną</span>'}</div>
                             <div class="question-actions">
                                 <button class="icon-btn edit" onclick="zaladujDoEdycji(${index})" title="Edytuj">✏️</button>
                                 <button class="icon-btn delete" onclick="usunPytanie(${index})" title="Usuń">🗑️</button>
@@ -617,6 +671,7 @@
             });
 
             const radioButtons = document.querySelectorAll('input[name="poprawna"]');
+            radioButtons.forEach(r => r.checked = false);
             if (radioButtons[pyt.poprawna]) {
                 radioButtons[pyt.poprawna].checked = true;
             }
@@ -662,7 +717,12 @@
             const obrazek = document.getElementById("obrazekInput").value.trim();
             const odpInputs = document.querySelectorAll(".odp-input");
             const odpowiedzi = Array.from(odpInputs).map(i => i.value.trim());
-            const poprawnaIdx = parseInt(document.querySelector('input[name="poprawna"]:checked').value);
+            const zaznaczona = document.querySelector('input[name="poprawna"]:checked');
+            if (!zaznaczona) {
+                pokazStatus("❌ Zaznacz poprawną odpowiedź.", "error");
+                return;
+            }
+            const poprawnaIdx = parseInt(zaznaczona.value);
 
             if (edytowanyIndex === -1 && aktualnePytania.length >= maxLimitPytan) {
                 pokazStatus(`❌ Osiągnięto limit! Ten zestaw zawiera już ${maxLimitPytan} pytań.`, "error");
