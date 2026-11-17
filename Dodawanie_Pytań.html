@@ -354,6 +354,20 @@
 </head>
 
 <body>
+    <!-- Logowanie administratora -->
+    <div id="loginBox" style="position:fixed;inset:0;background:#0b0b0b;display:flex;align-items:center;justify-content:center;z-index:9999;font-family:Arial,sans-serif;">
+        <div style="text-align:center;color:#fff;background:#1a1a1a;padding:30px 36px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);min-width:280px;">
+            <h3 style="margin-top:0;">🔒 Logowanie administratora</h3>
+            <input id="loginEmail" type="email" placeholder="E-mail" autocomplete="username"
+                style="width:100%;padding:10px;margin-bottom:10px;box-sizing:border-box;border-radius:8px;border:none;">
+            <input id="loginHaslo" type="password" placeholder="Hasło" autocomplete="current-password"
+                style="width:100%;padding:10px;margin-bottom:12px;box-sizing:border-box;border-radius:8px;border:none;">
+            <button id="loginBtn" style="width:100%;padding:10px;border:none;border-radius:8px;cursor:pointer;font-weight:bold;">Zaloguj</button>
+            <p id="loginBlad" style="color:#f87171;margin:10px 0 0 0;min-height:1em;"></p>
+        </div>
+    </div>
+    <button id="logoutBtn" style="display:none;position:fixed;top:10px;right:10px;z-index:9000;padding:6px 10px;border-radius:8px;cursor:pointer;">Wyloguj</button>
+
     <div class="container">
         <!-- Zakładki wyboru bazy -->
         <div class="tab-navigation">
@@ -443,6 +457,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
+            from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         // =========================================================================
@@ -466,6 +482,30 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+
+        // ===========================
+        // Logowanie administratora
+        // ===========================
+        const auth = getAuth(app);
+
+        async function zaloguj() {
+            const blad = document.getElementById("loginBlad");
+            blad.textContent = "";
+            try {
+                await signInWithEmailAndPassword(
+                    auth,
+                    document.getElementById("loginEmail").value.trim(),
+                    document.getElementById("loginHaslo").value
+                );
+                document.getElementById("loginHaslo").value = "";
+            } catch (e) {
+                console.error(e);
+                blad.textContent = "Błędny e-mail lub hasło";
+            }
+        }
+        document.getElementById("loginBtn").addEventListener("click", zaloguj);
+        document.getElementById("loginHaslo").addEventListener("keydown", e => { if (e.key === "Enter") zaloguj(); });
+        document.getElementById("logoutBtn").addEventListener("click", () => signOut(auth));
 
         // Stan aplikacji
         let aktualnaKolekcja = "baza_pytan";
@@ -792,7 +832,12 @@
 
         // Pierwsze wczytanie przy starcie
         document.getElementById("zestawInput").value = aktualnyZestawId;
-        pobierzIPokazPytania();
+
+        onAuthStateChanged(auth, user => {
+            document.getElementById("loginBox").style.display = user ? "none" : "flex";
+            document.getElementById("logoutBtn").style.display = user ? "block" : "none";
+            if (user) { pobierzIPokazPytania(); }
+        });
     </script>
 </body>
 
