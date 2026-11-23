@@ -2,7 +2,10 @@ Admin:
     https://rysiek111.github.io/Motorowodni/Admin.html
 
 Motorowodni:
-        https://rysiek111.github.io/Motorowodni/Motorowodni/Motorowodni.html
+	Test:
+        	https://rysiek111.github.io/Motorowodni/Motorowodni/Motorowodni.html
+	Fiszki:
+		https://rysiek111.github.io/Motorowodni/Motorowodni/Fiszki.html
 
 Holownik:
         https://rysiek111.github.io/Motorowodni/Holownik/holownik.html
