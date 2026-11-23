@@ -280,7 +280,7 @@
                     <label class="input-label">Podaj Imię i Nazwisko kandydata</label>
                     <div class="input-wrapper">
                         <span class="icon">👤</span>
-                        <input id="nickInput" placeholder="Wpisz swoje Imię i Nazwisko..." oninput="validateNick()" autocomplete="off">
+                        <input id="nickInput" maxlength="60" placeholder="Wpisz swoje Imię i Nazwisko..." oninput="validateNick()" autocomplete="off">
                     </div>
                     <div id="nickError" class="error"></div>
                 </div>
@@ -387,9 +387,21 @@
             pokazPytanie();
         }
 
+        // Zamiana znaków specjalnych, żeby tekst wpisany przez użytkownika nie był traktowany jak kod HTML
+        function esc(s) {
+            return String(s ?? "").replace(/[&<>"']/g, c => ({
+                "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+            }[c]));
+        }
+
+        // Ustawienia tego quizu
+        const KOLEKCJA_WYNIKOW = "holownik";
+        const PROG_ZALICZENIA = 20 / 25;   // ułamek poprawnych odpowiedzi potrzebny do zaliczenia
+
         async function zapiszWybor() {
+            let bladZapisu = "";
             try {
-                await addDoc(collection(db, "holownik"), {
+                await addDoc(collection(db, KOLEKCJA_WYNIKOW), {
                     gracz: daneGracza,
                     zestaw: wybranyZestaw,
                     wybory: wybory,
@@ -397,53 +409,70 @@
                     procent: Number(((poprawne / pytania.length) * 100).toFixed(2)),
                     data: new Date()
                 });
-
-                let podsumowanieSzczegolowe = "";
-                wybory.forEach((w) => {
-                    podsumowanieSzczegolowe += `
-                        <div style="text-align: left; background: #151210; padding: 15px; border-radius: 8px; margin-bottom: 12px; border: 1px solid ${w.wynik ? 'rgba(74, 222, 128, 0.4)' : 'rgba(248, 113, 113, 0.4)'}; border-left: 5px solid ${w.wynik ? '#4ade80' : '#f87171'}">
-                            <p style="margin: 0 0 8px 0; font-weight: bold; font-size: 15px; color: #f1f5f9;">Pytanie ${w.NumerPytania}: ${w.pytanie}</p>
-                            ${w.obrazek ? `<img src="${w.obrazek}" style="max-width:250px;display:block;margin:10px auto;border-radius:8px;box-shadow:0 4px 15px rgba(0,0,0,.5);">` : ""}
-                            <p style="margin: 4px 0; font-size: 14px; color: ${w.wynik ? '#4ade80' : '#f87171'}">
-                                <strong>Twoja odpowiedź:</strong> ${w.odpowiedz} ${w.wynik ? '✓' : '✗'}
-                            </p>
-                            ${!w.wynik ? `<p style="margin: 4px 0; font-size: 14px; color: #4ade80"><strong>Poprawna odpowiedź:</strong> ${w.poprawna}</p>` : ''}
-                        </div>
-                    `;
-                });
-
-                let procent = Math.round((poprawne / pytania.length) * 100);
-                let czyZdal = (poprawne / pytania.length) >= 0.65;
-
-                let statusEgzaminu = czyZdal
-                    ? "<span style='color:#4ade80; text-shadow: 0 0 10px rgba(74, 222, 128, 0.4);'>ZALICZONY ✓</span>"
-                    : "<span style='color:#f87171;'>NIEZALICZONY ✗</span>";
-
-                appDiv.innerHTML = `
-                    <div style="text-align:center;" class="fade">
-                        <h2>Egzamin zakończony!</h2>
-                        <p style="font-size: 18px; color: #B5A79D;"><strong>${daneGracza}</strong></p>
-                        <p style="font-size: 16px; color: #F5F1ED; margin-top:5px;">Wynik egzaminu: ${statusEgzaminu}</p>
-                        <h2 style="color: #E67817; margin-top: 10px; margin-bottom: 25px; text-shadow: 0 0 10px rgba(230, 120, 23, 0.3);">
-                            Twój wynik: ${poprawne} / ${pytania.length}<br>
-                            Procent: ${procent}%
-                        </h2>
-                        
-                        <div style="max-height: 400px; overflow-y: auto; margin-bottom: 20px; padding-right: 5px;">
-                            ${podsumowanieSzczegolowe}
-                        </div>
-
-                        <button onclick="start()" style="margin-top: 10px; max-width: 200px;">Rozwiąż ponownie</button>
-                    </div>
-                `;
-
-                if (window.innerHeight < 800) {
-                    document.body.style.height = "auto";
-                    document.body.style.padding = "20px 0";
-                }
             } catch (e) {
                 console.error(e);
-                alert("Błąd zapisu wyniku do bazy danych!");
+                bladZapisu = (e && e.code === "permission-denied")
+                    ? "Baza odrzuciła zapis wyniku (brak uprawnień)."
+                    : "Nie udało się zapisać wyniku w bazie (sprawdź połączenie z internetem).";
+            }
+            // Podsumowanie pokazujemy zawsze, także gdy zapis się nie powiódł
+            pokazPodsumowanie(bladZapisu);
+        }
+
+        window.ponowZapis = function () {
+            appDiv.innerHTML = `<h2 style="text-align:center;">Zapisywanie wyniku...</h2>`;
+            zapiszWybor();
+        }
+
+        function pokazPodsumowanie(bladZapisu) {
+            let podsumowanieSzczegolowe = "";
+            wybory.forEach((w) => {
+                podsumowanieSzczegolowe += `
+                    <div style="text-align: left; background: #0b1524; padding: 15px; border-radius: 8px; margin-bottom: 12px; border: 1px solid ${w.wynik ? 'rgba(74, 222, 128, 0.4)' : 'rgba(248, 113, 113, 0.4)'}; border-left: 5px solid ${w.wynik ? '#4ade80' : '#f87171'}">
+                        <p style="margin: 0 0 8px 0; font-weight: bold; font-size: 15px; color: #f1f5f9;">Pytanie ${w.NumerPytania}: ${w.pytanie}</p>
+                        ${w.obrazek ? `<img src="${w.obrazek}" style="max-width:250px;display:block;margin:10px auto;border-radius:8px;box-shadow:0 4px 15px rgba(0,0,0,.5);">` : ""}
+                        <p style="margin: 4px 0; font-size: 14px; color: ${w.wynik ? '#4ade80' : '#f87171'}">
+                            <strong>Twoja odpowiedź:</strong> ${w.odpowiedz} ${w.wynik ? '✓' : '✗'}
+                        </p>
+                        ${!w.wynik ? `<p style="margin: 4px 0; font-size: 14px; color: #4ade80"><strong>Poprawna odpowiedź:</strong> ${w.poprawna}</p>` : ''}
+                    </div>
+                `;
+            });
+
+            const procent = Math.round((poprawne / pytania.length) * 100);
+            const czyZdal = (poprawne / pytania.length) >= PROG_ZALICZENIA;
+
+            const statusEgzaminu = czyZdal
+                ? "<span style='color:#4ade80; text-shadow: 0 0 10px rgba(74, 222, 128, 0.4);'>ZALICZONY ✓</span>"
+                : "<span style='color:#f87171;'>NIEZALICZONY ✗</span>";
+
+            const ostrzezenie = bladZapisu ? `
+                <div style="background: rgba(248, 113, 113, 0.15); border: 1px solid #f87171; color: #fecaca; padding: 12px; border-radius: 8px; margin-bottom: 20px;">
+                    ⚠️ ${bladZapisu}<br>Twój wynik poniżej jest poprawny, ale nie został zapisany.<br>
+                    <button onclick="ponowZapis()" style="margin-top: 10px; max-width: 240px;">Spróbuj zapisać ponownie</button>
+                </div>` : "";
+
+            appDiv.innerHTML = `
+                <div style="text-align:center;" class="fade">
+                    <h2>Egzamin zakończony!</h2>
+                    <p style="font-size: 18px; color: #94a3b8;"><strong>${esc(daneGracza)}</strong></p>
+                    <p style="font-size: 16px; color: #e2e8f0; margin-top:5px;">Wynik egzaminu: ${statusEgzaminu}</p>
+                    <h2 style="color: #38bdf8; margin-top: 10px; margin-bottom: 25px; text-shadow: 0 0 10px rgba(56, 189, 248, 0.3);">
+                        Twój wynik: ${poprawne} / ${pytania.length}<br>
+                        Procent: ${procent}%
+                    </h2>
+                    ${ostrzezenie}
+                    <div style="max-height: 400px; overflow-y: auto; margin-bottom: 20px; padding-right: 5px;">
+                        ${podsumowanieSzczegolowe}
+                    </div>
+
+                    <button onclick="start()" style="margin-top: 10px; max-width: 200px;">Rozwiąż ponownie</button>
+                </div>
+            `;
+
+            if (window.innerHeight < 800) {
+                document.body.style.height = "auto";
+                document.body.style.padding = "20px 0";
             }
         }
 

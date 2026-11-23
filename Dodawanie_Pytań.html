@@ -354,6 +354,20 @@
 </head>
 
 <body>
+    <!-- Logowanie administratora -->
+    <div id="loginBox" style="position:fixed;inset:0;background:#0b0b0b;display:flex;align-items:center;justify-content:center;z-index:9999;font-family:Arial,sans-serif;">
+        <div style="text-align:center;color:#fff;background:#1a1a1a;padding:30px 36px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);min-width:280px;">
+            <h3 style="margin-top:0;">🔒 Logowanie administratora</h3>
+            <input id="loginEmail" type="email" placeholder="E-mail" autocomplete="username"
+                style="width:100%;padding:10px;margin-bottom:10px;box-sizing:border-box;border-radius:8px;border:none;">
+            <input id="loginHaslo" type="password" placeholder="Hasło" autocomplete="current-password"
+                style="width:100%;padding:10px;margin-bottom:12px;box-sizing:border-box;border-radius:8px;border:none;">
+            <button id="loginBtn" style="width:100%;padding:10px;border:none;border-radius:8px;cursor:pointer;font-weight:bold;">Zaloguj</button>
+            <p id="loginBlad" style="color:#f87171;margin:10px 0 0 0;min-height:1em;"></p>
+        </div>
+    </div>
+    <button id="logoutBtn" style="display:none;position:fixed;top:10px;right:10px;z-index:9000;padding:6px 10px;border-radius:8px;cursor:pointer;">Wyloguj</button>
+
     <div class="container">
         <!-- Zakładki wyboru bazy -->
         <div class="tab-navigation">
@@ -429,6 +443,11 @@
                     <span id="counterBadge" class="badge">0 pytań</span>
                 </h2>
 
+                <div style="margin-bottom: 14px;">
+                    <button type="button" class="btn-main" style="margin-top:0;" onclick="document.getElementById('importFile').click()">📥 Importuj zestaw z pliku JSON</button>
+                    <input id="importFile" type="file" accept=".json,application/json" style="display:none" onchange="importujZJSON(event)">
+                </div>
+
                 <div id="questionsContainer" class="questions-list">
                     <div class="empty-info">Wczytywanie pytań z Firebase...</div>
                 </div>
@@ -438,6 +457,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
+            from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         // =========================================================================
@@ -462,12 +483,88 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // ===========================
+        // Logowanie administratora
+        // ===========================
+        const auth = getAuth(app);
+
+        async function zaloguj() {
+            const blad = document.getElementById("loginBlad");
+            blad.textContent = "";
+            try {
+                await signInWithEmailAndPassword(
+                    auth,
+                    document.getElementById("loginEmail").value.trim(),
+                    document.getElementById("loginHaslo").value
+                );
+                document.getElementById("loginHaslo").value = "";
+            } catch (e) {
+                console.error(e);
+                blad.textContent = "Błędny e-mail lub hasło";
+            }
+        }
+        document.getElementById("loginBtn").addEventListener("click", zaloguj);
+        document.getElementById("loginHaslo").addEventListener("keydown", e => { if (e.key === "Enter") zaloguj(); });
+        document.getElementById("logoutBtn").addEventListener("click", () => signOut(auth));
+
         // Stan aplikacji
         let aktualnaKolekcja = "baza_pytan";
         let aktualnyZestawId = "ZESTAW_1aHL";
         let maxLimitPytan = 75;
         let aktualnePytania = [];
         let edytowanyIndex = -1;
+
+        function esc(t) {
+            return String(t ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+        }
+
+        // Import całego zestawu z pliku JSON (zastępuje pytania w aktualnym zestawie)
+        window.importujZJSON = async function(e) {
+            const plik = e.target.files[0];
+            e.target.value = "";
+            if (!plik) return;
+
+            let dane;
+            try {
+                dane = JSON.parse(await plik.text());
+            } catch (err) {
+                pokazStatus("❌ Plik nie jest poprawnym JSON-em: " + err.message, "error");
+                return;
+            }
+
+            if (!Array.isArray(dane) || dane.length === 0) {
+                pokazStatus("❌ JSON musi być niepustą listą pytań.", "error");
+                return;
+            }
+            if (dane.length > maxLimitPytan) {
+                pokazStatus(`❌ Plik ma ${dane.length} pytań, a limit tej bazy to ${maxLimitPytan}.`, "error");
+                return;
+            }
+            const bledne = dane.findIndex(p => !p || typeof p.tresc !== "string" || !Array.isArray(p.odp) || p.odp.length !== 3);
+            if (bledne !== -1) {
+                pokazStatus(`❌ Pytanie nr ${bledne + 1} ma zły format (potrzebne: tresc oraz dokładnie 3 odpowiedzi w odp).`, "error");
+                return;
+            }
+
+            if (!confirm(`Zastąpić zawartość zestawu "${aktualnyZestawId}" (${aktualnePytania.length} pytań) nowymi ${dane.length} pytaniami z pliku?`)) return;
+
+            const stare = aktualnePytania;
+            anulujEdycje();
+            aktualnePytania = dane.map((p, i) => {
+                const nowe = {
+                    id: i + 1,
+                    tresc: p.tresc.trim(),
+                    odp: p.odp.map(o => String(o).trim()),
+                    poprawna: Number.isInteger(p.poprawna) && p.poprawna >= 0 && p.poprawna <= 2 ? p.poprawna : null
+                };
+                // obrazek: z pliku, a jeśli go brak – zachowaj dotychczasowy z bazy (ta sama pozycja)
+                const obr = p.obrazek || (stare[i] && stare[i].obrazek);
+                if (obr) nowe.obrazek = obr;
+                return nowe;
+            });
+
+            await zapiszZestawDoFirebase(`✓ Zaimportowano ${aktualnePytania.length} pytań.`);
+        };
 
         // Pomocnik składający URL z GitHuba
         function uzyskajURLGitHub(path) {
@@ -531,6 +628,7 @@
             const container = document.getElementById("questionsContainer");
             const zestawId = document.getElementById("zestawInput").value.trim();
             aktualnyZestawId = zestawId;
+            if (edytowanyIndex !== -1) anulujEdycje();
 
             if (!zestawId) {
                 container.innerHTML = `<div class="empty-info">Podaj nazwę zestawu, aby wczytać pytania.</div>`;
@@ -561,7 +659,8 @@
             const container = document.getElementById("questionsContainer");
             const counterBadge = document.getElementById("counterBadge");
 
-            counterBadge.textContent = `${aktualnePytania.length} / ${maxLimitPytan} pytań`;
+            const bezPoprawnej = aktualnePytania.filter(p => !Number.isInteger(p.poprawna)).length;
+            counterBadge.textContent = `${aktualnePytania.length} / ${maxLimitPytan} pytań` + (bezPoprawnej ? ` · ⚠ ${bezPoprawnej} bez odp.` : "");
 
             if (aktualnePytania.length === 0) {
                 container.innerHTML = `<div class="empty-info">Brak pytań w tym zestawie. Dodaj pierwsze!</div>`;
@@ -572,13 +671,13 @@
                 let imgHtml = "";
                 if (pyt.obrazek) {
                     const imgUrl = uzyskajURLGitHub(pyt.obrazek);
-                    imgHtml = `<div><img class="list-img-preview" src="${imgUrl}" alt="Obrazek pytania" onerror="this.style.display='none'"></div>`;
+                    imgHtml = `<div><img class="list-img-preview" src="${esc(imgUrl)}" alt="Obrazek pytania" onerror="this.style.display='none'"></div>`;
                 }
 
                 return `
                     <div class="question-card">
                         <div class="question-header">
-                            <div class="question-title">${index + 1}. ${pyt.tresc}</div>
+                            <div class="question-title">${index + 1}. ${esc(pyt.tresc)}${Number.isInteger(pyt.poprawna) ? "" : ' <span style="color:#f87171;">⚠ zaznacz poprawną</span>'}</div>
                             <div class="question-actions">
                                 <button class="icon-btn edit" onclick="zaladujDoEdycji(${index})" title="Edytuj">✏️</button>
                                 <button class="icon-btn delete" onclick="usunPytanie(${index})" title="Usuń">🗑️</button>
@@ -588,7 +687,7 @@
                         <div class="answers-preview">
                             ${pyt.odp.map((ans, i) => `
                                 <div class="ans-item ${i === pyt.poprawna ? 'correct' : ''}">
-                                    ${String.fromCharCode(65 + i)}) ${ans} ${i === pyt.poprawna ? '✓' : ''}
+                                    ${String.fromCharCode(65 + i)}) ${esc(ans)} ${i === pyt.poprawna ? '✓' : ''}
                                 </div>
                             `).join('')}
                         </div>
@@ -612,6 +711,7 @@
             });
 
             const radioButtons = document.querySelectorAll('input[name="poprawna"]');
+            radioButtons.forEach(r => r.checked = false);
             if (radioButtons[pyt.poprawna]) {
                 radioButtons[pyt.poprawna].checked = true;
             }
@@ -627,7 +727,10 @@
         // Anulowanie edycji
         window.anulujEdycje = function() {
             edytowanyIndex = -1;
+            const zestawInput = document.getElementById("zestawInput");
+            const zachowanyZestaw = zestawInput.value;
             document.getElementById("questionForm").reset();
+            zestawInput.value = zachowanyZestaw; // reset() nie może czyścić identyfikatora zestawu
             document.getElementById("formTitle").childNodes[0].nodeValue = "➕ Dodaj Pytanie ";
             document.getElementById("submitBtn").textContent = "Dodaj Pytanie do Bazy";
             document.getElementById("cancelBtn").style.display = "none";
@@ -641,58 +744,103 @@
             aktualnePytania.splice(index, 1);
             aktualnePytania.forEach((p, idx) => p.id = idx + 1);
 
+            anulujEdycje();
             await zapiszZestawDoFirebase("Pytanie zostało usunięte!");
-            if (edytowanyIndex === index) anulujEdycje();
         };
 
         // Obsługa zapisu (dodawanie lub edycja)
         window.obsluzZapis = async function(e) {
-            e.preventDefault();
+    e.preventDefault();
 
+<<<<<<< HEAD
+    const submitBtn = document.getElementById("submitBtn");
+    const tresc = document.getElementById("trescInput").value.trim();
+    const obrazekVal = document.getElementById("obrazekInput").value.trim();
+    const odpInputs = document.querySelectorAll(".odp-input");
+    const odpowiedzi = Array.from(odpInputs).map(i => i.value.trim());
+    const poprawnaIdx = parseInt(document.querySelector('input[name="poprawna"]:checked').value);
+=======
             const submitBtn = document.getElementById("submitBtn");
             const tresc = document.getElementById("trescInput").value.trim();
             const obrazek = document.getElementById("obrazekInput").value.trim();
             const odpInputs = document.querySelectorAll(".odp-input");
             const odpowiedzi = Array.from(odpInputs).map(i => i.value.trim());
-            const poprawnaIdx = parseInt(document.querySelector('input[name="poprawna"]:checked').value);
-
-            if (edytowanyIndex === -1 && aktualnePytania.length >= maxLimitPytan) {
-                pokazStatus(`❌ Osiągnięto limit! Ten zestaw zawiera już ${maxLimitPytan} pytań.`, "error");
+            const zaznaczona = document.querySelector('input[name="poprawna"]:checked');
+            if (!zaznaczona) {
+                pokazStatus("❌ Zaznacz poprawną odpowiedź.", "error");
                 return;
             }
+            const poprawnaIdx = parseInt(zaznaczona.value);
+>>>>>>> abeac8f776f3187c3317e6a7c4ea8d9978711c36
 
-            submitBtn.disabled = true;
+    if (edytowanyIndex === -1 && aktualnePytania.length >= maxLimitPytan) {
+        pokazStatus(`❌ Osiągnięto limit! Ten zestaw zawiera już ${maxLimitPytan} pytań.`, "error");
+        return;
+    }
 
+    submitBtn.disabled = true;
+
+<<<<<<< HEAD
+    // Tworzymy bazowy obiekt pytania
+    const danePytania = {
+        id: edytowanyIndex >= 0 ? aktualnePytania[edytowanyIndex].id : aktualnePytania.length + 1,
+        tresc: tresc,
+        odp: odpowiedzi,
+        poprawna: poprawnaIdx
+    };
+=======
             const danePytania = {
-                id: edytowanyIndex >= 0 ? aktualnePytania[edytowanyIndex].id : aktualnePytania.length + 1,
+                id: edytowanyIndex >= 0 ? edytowanyIndex + 1 : aktualnePytania.length + 1,
                 tresc: tresc,
                 odp: odpowiedzi,
                 poprawna: poprawnaIdx
             };
+>>>>>>> abeac8f776f3187c3317e6a7c4ea8d9978711c36
 
-            if (obrazek) {
-                danePytania.obrazek = obrazek;
-            }
+    // Obrazek dodajemy TYLKO jeśli nie jest pustym ciągiem znaków
+    if (obrazekVal !== "") {
+        danePytania.obrazek = obrazekVal;
+    }
 
-            if (edytowanyIndex >= 0) {
-                aktualnePytania[edytowanyIndex] = danePytania;
-            } else {
-                aktualnePytania.push(danePytania);
-            }
+    if (edytowanyIndex >= 0) {
+        aktualnePytania[edytowanyIndex] = danePytania;
+    } else {
+        aktualnePytania.push(danePytania);
+    }
 
-            const wiadomosc = edytowanyIndex >= 0 ? "✓ Zmiany zostały zapisane!" : "✓ Pytanie dodane pomyślnie!";
-            const sukces = await zapiszZestawDoFirebase(wiadomosc);
-
-            if (sukces) {
-                anulujEdycje();
-            }
-            submitBtn.disabled = false;
+    // Czyszczenie całej tablicy z ewentualnych niepożądanych wartości 'undefined' przed wysłaniem do Firebase
+    const bezpiecznePytania = aktualnePytania.map(pyt => {
+        const czystePytanie = {
+            id: pyt.id,
+            tresc: pyt.tresc,
+            odp: pyt.odp,
+            poprawna: pyt.poprawna
         };
+        if (pyt.obrazek) {
+            czystePytanie.obrazek = pyt.obrazek;
+        }
+        return czystePytanie;
+    });
+
+    aktualnePytania = bezpiecznePytania;
+
+    const wiadomosc = edytowanyIndex >= 0 ? "✓ Zmiany zostały zapisane!" : "✓ Pytanie dodane pomyślnie!";
+    const sukces = await zapiszZestawDoFirebase(wiadomosc);
+
+    if (sukces) {
+        anulujEdycje();
+    }
+    submitBtn.disabled = false;
+};
 
         // Zapis tablicy pytań do bazy
         async function zapiszZestawDoFirebase(komunikatSukcesu) {
             try {
                 const docRef = doc(db, aktualnaKolekcja, aktualnyZestawId);
+                // Numeracja od nowa + usunięcie pól undefined (Firestore ich nie przyjmuje)
+                aktualnePytania = JSON.parse(JSON.stringify(
+                    aktualnePytania.map((p, idx) => ({ ...p, id: idx + 1 }))
+                ));
                 await setDoc(docRef, { pytania: aktualnePytania }, { merge: true });
                 
                 pokazStatus(komunikatSukcesu, "success");
@@ -705,11 +853,14 @@
             }
         }
 
+        let statusTimeout = null;
         function pokazStatus(msg, type) {
             const statusDiv = document.getElementById("status");
+            clearTimeout(statusTimeout);
+            statusDiv.style.display = "";
             statusDiv.className = type;
             statusDiv.textContent = msg;
-            setTimeout(() => {
+            statusTimeout = setTimeout(() => {
                 statusDiv.className = "";
                 statusDiv.style.display = "none";
             }, 4000);
@@ -717,7 +868,12 @@
 
         // Pierwsze wczytanie przy starcie
         document.getElementById("zestawInput").value = aktualnyZestawId;
-        pobierzIPokazPytania();
+
+        onAuthStateChanged(auth, user => {
+            document.getElementById("loginBox").style.display = user ? "none" : "flex";
+            document.getElementById("logoutBtn").style.display = user ? "block" : "none";
+            if (user) { pobierzIPokazPytania(); }
+        });
     </script>
 </body>
 
