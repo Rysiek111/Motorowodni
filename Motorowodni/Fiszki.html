@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SHOWteam — Fiszki: Patent Sternika Motorowodnego</title>
+    <link rel="icon" type="image/x-icon" href="icon.ico">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            background: linear-gradient(135deg,
+                    #f06e0c 22%,
+                    #1F1A17 48%,
+                    #000000 75%);
+            font-family: "Inter", Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .box {
+            width: 100%;
+            max-width: 900px;
+            background: rgba(31, 26, 23, 0.96);
+            border: 1px solid rgba(230, 120, 23, 0.3);
+            border-radius: 16px;
+            padding: 30px;
+            color: #F5F1ED;
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.7),
+                0 0 30px rgba(230, 120, 23, 0.05);
+            backdrop-filter: blur(10px);
+            box-sizing: border-box;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 25px;
+            color: #E67817;
+            letter-spacing: 2px;
+            font-weight: 800;
+            text-shadow: 0 0 10px rgba(230, 120, 23, 0.25);
+        }
+
+        h2 {
+            font-size: 22px;
+            line-height: 1.4;
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: #F5F1ED;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            margin: 8px 0;
+            border: 1px solid rgba(230, 120, 23, 0.3);
+            border-radius: 10px;
+            background: #2A211B;
+            color: #E67817;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        button:disabled {
+            background: #151210;
+            color: #665B52;
+            border-color: rgba(102, 91, 82, 0.3);
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        button:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        button:hover:not(:disabled) {
+            background: #E67817;
+            color: #1F1A17;
+            border-color: #E67817;
+            box-shadow: 0 0 15px rgba(230, 120, 23, 0.35);
+            transform: translateY(-2px);
+        }
+
+        .progress {
+            height: 6px;
+            background: #100D0B;
+            border-radius: 10px;
+            margin-bottom: 18px;
+            overflow: hidden;
+        }
+
+        .progress-inner {
+            height: 100%;
+            background: linear-gradient(90deg, #A94F0A, #CC6815, #E67817);
+            box-shadow: 0 0 8px rgba(230, 120, 23, 0.45);
+            transition: width 0.3s ease;
+        }
+
+        .question-img {
+            display: block;
+            width: auto;
+            max-width: 100%;
+            max-height: 450px;
+            margin: 15px auto 25px auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .fade { animation: fadeIn 0.25s ease; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== Fiszki ===== */
+        .srodek { text-align: center; }
+        .muted { color: #B5A79D; font-size: 14px; }
+        .opis { color: #B5A79D; line-height: 1.5; margin-top: 0; }
+        .ok { color: #4ade80; }
+        .zle-txt { color: #f87171; }
+
+        .pasek {
+            display: flex;
+            justify-content: space-between;
+            color: #B5A79D;
+            font-size: 14px;
+            margin-bottom: 14px;
+        }
+
+        .komunikat {
+            background: rgba(248, 113, 113, 0.12);
+            border: 1px solid rgba(248, 113, 113, 0.4);
+            color: #fecaca;
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin-bottom: 14px;
+            font-size: 14px;
+        }
+
+
+        .odp {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-align: left;
+        }
+
+        .odp .nr {
+            flex: 0 0 auto;
+            min-width: 24px;
+            height: 24px;
+            line-height: 24px;
+            text-align: center;
+            border-radius: 6px;
+            background: rgba(230, 120, 23, 0.15);
+            font-size: 13px;
+        }
+
+        .odp.wybrana, .odp.wybrana:hover {
+            background: rgba(230, 120, 23, 0.2) !important;
+            border-color: #E67817 !important;
+            color: #F5F1ED !important;
+            transform: none !important;
+        }
+
+        .odp.dobra, .odp.dobra:hover {
+            background: rgba(74, 222, 128, 0.18) !important;
+            border-color: #4ade80 !important;
+            color: #4ade80 !important;
+            box-shadow: none !important;
+            transform: none !important;
+        }
+
+        .odp.zla, .odp.zla:hover {
+            background: rgba(248, 113, 113, 0.18) !important;
+            border-color: #f87171 !important;
+            color: #f87171 !important;
+            box-shadow: none !important;
+            transform: none !important;
+        }
+
+        .odp.zablokowana { pointer-events: none; }
+        .odp.zablokowana:not(.dobra):not(.zla) { opacity: 0.55; }
+
+        .feedback {
+            padding: 12px 14px;
+            border-radius: 10px;
+            margin: 14px 0 6px 0;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .feedback.dobrze {
+            background: rgba(74, 222, 128, 0.12);
+            border: 1px solid rgba(74, 222, 128, 0.4);
+            color: #4ade80;
+        }
+
+        .feedback.zle {
+            background: rgba(248, 113, 113, 0.12);
+            border: 1px solid rgba(248, 113, 113, 0.4);
+            color: #fecaca;
+        }
+
+        .drugi {
+            background: transparent;
+            border-color: #403127;
+            color: #B5A79D;
+            font-weight: 500;
+        }
+
+        .wynik {
+            font-size: 28px;
+            font-weight: 800;
+            color: #38bdf8;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="box">
+        <h1>=== Fiszki – Sternik Motorowodny ===</h1>
+        <p class="muted srodek" style="margin-top:-10px;">Tryb nauki – wszystkie zestawy wymieszane, podejścia nie są zapisywane</p>
+        <div id="app"></div>
+    </div>
+
+    <script type="module">
+        // Tryb nauki: tylko ODCZYT pytań z bazy. Nic nie jest zapisywane
+        // (ani w Firebase, ani w przeglądarce).
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC_c5yD2XF-mbCK1NGLYMdIk7UVKGsLxoU",
+            authDomain: "motorowodni-49c56.firebaseapp.com",
+            projectId: "motorowodni-49c56",
+            storageBucket: "motorowodni-49c56.firebasestorage.app",
+            messagingSenderId: "634414019790",
+            appId: "1:634414019790:web:f7ad6c6fc8bc424337cc9f",
+            measurementId: "G-9E6DFZ072J"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Te same zestawy co w Motorowodni.html
+        const ZESTAWY = [
+            "ZESTAW_1aHL",
+            "ZESTAW_2aHL",
+            "ZESTAW_3aHL"
+        ];
+
+        const appDiv = document.getElementById("app");
+        const $ = id => document.getElementById(id);
+
+        // ----- stan sesji (tylko w pamięci strony) -----
+        let pytania = [];        // wszystkie wczytane pytania ze wszystkich zestawów
+        let kolejka = [];        // pytania w bieżącej rundzie: { p, odp }
+        let bledne = [];         // pytania, na które w tej rundzie odpowiedziano źle
+        let uwagi = "";          // informacje o pominiętych pytaniach / niewczytanych zestawach
+        let index = 0;
+        let dobre = 0;
+        let zle = 0;
+        let wybrana = null;      // oryginalny indeks wybranej odpowiedzi
+        let zatwierdzone = false;
+
+        // ----- narzędzia -----
+        function esc(s) {
+            return String(s ?? "").replace(/[&<>"']/g, c => ({
+                "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+            }[c]));
+        }
+
+        function srcObrazka(url) {
+            const s = String(url || "").trim();
+            if (!s) return "";
+            if (/^[a-z][a-z0-9+.-]*:/i.test(s) && !/^(https?:|data:image\/)/i.test(s)) return "";
+            return s;
+        }
+
+        function shuffle(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function poprawnePytanie(p) {
+            return p && typeof p.tresc === "string" && Array.isArray(p.odp) && p.odp.length >= 2
+                && Number.isInteger(p.poprawna) && p.poprawna >= 0 && p.poprawna < p.odp.length;
+        }
+
+        // ----- ekran błędu wczytywania -----
+        function blad(info) {
+            appDiv.innerHTML = `
+                <div class="srodek fade">
+                    <div class="komunikat">${esc(info)}</div>
+                    <button data-akcja="ponow">🔄 Spróbuj ponownie</button>
+                </div>`;
+        }
+
+        async function wczytaj() {
+            appDiv.innerHTML = `<h2 class="srodek">Wczytywanie pytań...</h2>`;
+
+            const ids = ZESTAWY;
+            const wyniki = await Promise.allSettled(ids.map(id => getDoc(doc(db, "baza_pytan", id))));
+
+            const zebrane = [];
+            const niewczytane = [];
+            let pominiete = 0;
+
+            wyniki.forEach((r, k) => {
+                if (r.status !== "fulfilled" || !r.value.exists() || !Array.isArray(r.value.data().pytania)) {
+                    niewczytane.push(ids[k]);
+                    return;
+                }
+                r.value.data().pytania.forEach(p => {
+                    if (poprawnePytanie(p)) zebrane.push(p);
+                    else pominiete++;
+                });
+            });
+
+            if (!zebrane.length) {
+                blad("Nie udało się wczytać pytań" + (niewczytane.length ? " (" + niewczytane.join(", ") + ")" : "") + ". Sprawdź połączenie i spróbuj ponownie.");
+                return;
+            }
+
+            const czesci = [];
+            if (niewczytane.length) czesci.push("Nie wczytano: " + niewczytane.join(", "));
+            if (pominiete) czesci.push("Pominięto " + pominiete + " pytań bez zaznaczonej poprawnej odpowiedzi");
+            uwagi = czesci.join(". ");
+
+            pytania = zebrane;
+            startRunda(pytania);
+        }
+
+        // ----- runda -----
+        function startRunda(lista) {
+            const baza = lista.slice();
+            shuffle(baza);
+            kolejka = baza.map(p => ({
+                p,
+                odp: shuffle(p.odp.map((tekst, i) => ({ tekst, idx: i })))
+            }));
+            bledne = [];
+            index = 0;
+            dobre = 0;
+            zle = 0;
+            pokazPytanie();
+        }
+
+        function pokazPytanie() {
+            if (index >= kolejka.length) {
+                koniec();
+                return;
+            }
+
+            const { p, odp } = kolejka[index];
+            wybrana = null;
+            zatwierdzone = false;
+
+            const proc = (index / kolejka.length) * 100;
+            const src = srcObrazka(p.obrazek);
+
+            appDiv.innerHTML = `
+                <div class="progress"><div class="progress-inner" style="width:${proc}%"></div></div>
+                <div class="pasek">
+                    <span>Pytanie ${index + 1} z ${kolejka.length}</span>
+                    <span><b class="ok" id="licznikDobre">✓ ${dobre}</b> &nbsp; <b class="zle-txt" id="licznikZle">✗ ${zle}</b></span>
+                </div>
+                ${uwagi ? `<div class="komunikat">${esc(uwagi)}</div>` : ""}
+                <h2 class="fade">${esc(p.tresc)}</h2>
+                ${src ? `<img class="question-img fade" src="${esc(src)}" alt="Rysunek pomocniczy"
+                    onerror="this.outerHTML='<p class=&quot;muted srodek&quot;>⚠ Nie udało się wczytać obrazka do tego pytania.</p>'">` : ""}
+                <div id="odpowiedzi">
+                    ${odp.map((o, k) => `
+                        <button class="odp fade" data-idx="${o.idx}"><span class="nr">${k + 1}</span><span>${esc(o.tekst)}</span></button>
+                    `).join("")}
+                </div>
+                <div id="feedback" class="feedback" hidden></div>
+                <button id="akcja" data-akcja="zatwierdz" disabled>Zatwierdź odpowiedź</button>
+            `;
+        }
+
+        function wybierz(idx) {
+            if (zatwierdzone) return;
+            wybrana = idx;
+            document.querySelectorAll(".odp").forEach(b => {
+                b.classList.toggle("wybrana", Number(b.dataset.idx) === idx);
+            });
+            $("akcja").disabled = false;
+        }
+
+        function zatwierdz() {
+            if (zatwierdzone || wybrana === null) return;
+            zatwierdzone = true;
+
+            const { p } = kolejka[index];
+            const dobrze = wybrana === p.poprawna;
+
+            if (dobrze) {
+                dobre++;
+            } else {
+                zle++;
+                if (!bledne.includes(p)) bledne.push(p);
+            }
+
+            document.querySelectorAll(".odp").forEach(b => {
+                const i = Number(b.dataset.idx);
+                b.classList.remove("wybrana");
+                b.classList.add("zablokowana");
+                if (i === p.poprawna) b.classList.add("dobra");
+                else if (i === wybrana) b.classList.add("zla");
+            });
+
+            const fb = $("feedback");
+            fb.hidden = false;
+            fb.className = "feedback fade " + (dobrze ? "dobrze" : "zle");
+            fb.innerHTML = dobrze
+                ? "✓ Dobrze!"
+                : `✗ Źle. Poprawna odpowiedź: <b>${esc(p.odp[p.poprawna])}</b>`;
+
+            $("licznikDobre").textContent = "✓ " + dobre;
+            $("licznikZle").textContent = "✗ " + zle;
+
+            const a = $("akcja");
+            a.disabled = false;
+            a.dataset.akcja = "dalej";
+            a.textContent = (index + 1 >= kolejka.length) ? "Zobacz wynik" : "Dalej →";
+        }
+
+        function dalej() {
+            index++;
+            pokazPytanie();
+        }
+
+        function koniec() {
+            const razem = kolejka.length;
+            const proc = Math.round((dobre / razem) * 100);
+
+            appDiv.innerHTML = `
+                <div class="srodek fade">
+                    <h2>Runda zakończona</h2>
+                    <div class="wynik">${dobre} / ${razem} (${proc}%)</div>
+                    <p class="muted">To tylko ćwiczenie – wynik nie został zapisany.</p>
+                    ${bledne.length
+                        ? `<button data-akcja="powtorz">🔁 Powtórz błędne (${bledne.length})</button>`
+                        : `<p class="ok"><b>Wszystko poprawnie! 🎉</b></p>`}
+                    <button data-akcja="odnowa">🔄 Zacznij od nowa (nowe wymieszanie)</button>
+                </div>`;
+        }
+
+        // ----- obsługa kliknięć -----
+        appDiv.addEventListener("click", e => {
+            const b = e.target.closest("button");
+            if (!b) return;
+
+            if (b.dataset.idx !== undefined) {
+                wybierz(Number(b.dataset.idx));
+            } else if (b.dataset.akcja === "zatwierdz") {
+                zatwierdz();
+            } else if (b.dataset.akcja === "dalej") {
+                dalej();
+            } else if (b.dataset.akcja === "powtorz") {
+                startRunda(bledne.slice());
+            } else if (b.dataset.akcja === "odnowa") {
+                startRunda(pytania);
+            } else if (b.dataset.akcja === "ponow") {
+                wczytaj();
+            }
+        });
+
+        // Skróty: 1/2/3 wybiera odpowiedź, Enter zatwierdza lub przechodzi dalej
+        document.addEventListener("keydown", e => {
+            if (e.repeat) return;
+
+            if (!$("akcja")) return;
+
+            if (/^[1-9]$/.test(e.key)) {
+                if (zatwierdzone) return;
+                const btn = document.querySelectorAll(".odp")[Number(e.key) - 1];
+                if (btn) {
+                    e.preventDefault();
+                    wybierz(Number(btn.dataset.idx));
+                }
+            } else if (e.key === "Enter") {
+                e.preventDefault();
+                if (!zatwierdzone) zatwierdz();
+                else dalej();
+            }
+        });
+
+        wczytaj();
+    </script>
+</body>
+
+</html>
