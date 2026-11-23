@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Panel Administratora - Egzaminy</title>
+    <title>Panel Administratora - Egzaminy i pytania</title>
     <link rel="icon" type="image/x-icon" href="icon.ico">
 
     <style>
@@ -35,7 +35,7 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
         }
 
-        button {
+        .tab, .card button, #logoutBtn, #loginBtn {
             padding: 8px 12px;
             border: 1px solid rgba(230, 120, 23, 0.3);
             border-radius: 8px;
@@ -45,7 +45,7 @@
             transition: all 0.2s ease;
         }
 
-        button:hover {
+        .tab:hover, .card button:hover, #logoutBtn:hover, #loginBtn:hover {
             background: #E67817;
             color: #1F1A17;
             border-color: #E67817;
@@ -69,6 +69,7 @@
         .tabs { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
         .tab { padding: 10px 18px; font-weight: bold; font-size: 15px; }
         .tab.active { background: #E67817; color: #1F1A17; border-color: #E67817; }
+
 
         .card {
             padding: 10px;
@@ -137,6 +138,287 @@
         }
 
         #logoutBtn { position: fixed; top: 10px; right: 10px; z-index: 900; }
+
+        /* ===== Zakładka "Baza pytań" (dawny uploader) ===== */
+        #widokPytan, #widokPytan * { box-sizing: border-box; }
+        :root {
+                    --bg-color: #0d0b0a;
+                    --card-bg: rgba(31, 26, 23, 0.96);
+                    --accent-color: #E67817;
+                    --accent-hover: #ff881a;
+                    --border-color: rgba(230, 120, 23, 0.3);
+                    --text-color: #F5F1ED;
+                    --text-muted: #B5A79D;
+                    --input-bg: #151210;
+                }
+        #widokPytan .tab-navigation {
+                    display: flex;
+                    gap: 15px;
+                    margin-bottom: 20px;
+                }
+        #widokPytan .tab-btn {
+                    flex: 1;
+                    padding: 16px 20px;
+                    background: rgba(21, 18, 16, 0.85);
+                    border: 2px solid #403127;
+                    border-radius: 12px;
+                    color: var(--text-muted);
+                    font-size: 18px;
+                    font-weight: 700;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 10px;
+                }
+        #widokPytan .tab-btn:hover {
+                    border-color: var(--accent-color);
+                    color: var(--text-color);
+                }
+        #widokPytan .tab-btn.active {
+                    background: var(--accent-color);
+                    color: #1F1A17;
+                    border-color: var(--accent-color);
+                    box-shadow: 0 0 20px rgba(230, 120, 23, 0.4);
+                }
+        #widokPytan .layout-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 24px;
+                }
+        @media (max-width: 900px) {
+        #widokPytan .layout-grid {
+                        grid-template-columns: 1fr;
+                    }
+        }
+        #widokPytan .box {
+                    background: var(--card-bg);
+                    border: 1px solid var(--border-color);
+                    border-radius: 16px;
+                    padding: 25px;
+                    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+                    backdrop-filter: blur(10px);
+                }
+        #widokPytan h2 {
+                    color: var(--accent-color);
+                    margin-top: 0;
+                    margin-bottom: 20px;
+                    font-size: 22px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                }
+        #widokPytan .badge {
+                    background: rgba(230, 120, 23, 0.2);
+                    color: var(--accent-color);
+                    border: 1px solid var(--accent-color);
+                    font-size: 13px;
+                    padding: 4px 10px;
+                    border-radius: 20px;
+                }
+        #widokPytan .form-group {
+                    margin-bottom: 16px;
+                }
+        #widokPytan label {
+                    display: block;
+                    margin-bottom: 6px;
+                    color: var(--text-muted);
+                    font-size: 14px;
+                    font-weight: 600;
+                }
+        #widokPytan input, #widokPytan select, #widokPytan textarea {
+                    width: 100%;
+                    padding: 10px 12px;
+                    background: var(--input-bg);
+                    border: 2px solid #403127;
+                    border-radius: 8px;
+                    color: var(--text-color);
+                    font-size: 15px;
+                    font-family: inherit;
+                    transition: all 0.2s ease;
+                }
+        #widokPytan input:focus, #widokPytan select:focus, #widokPytan textarea:focus {
+                    outline: none;
+                    border-color: var(--accent-color);
+                    box-shadow: 0 0 0 3px rgba(230, 120, 23, 0.15);
+                }
+        #widokPytan textarea {
+                    resize: vertical;
+                    min-height: 80px;
+                }
+        #widokPytan .radio-group {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                }
+        #widokPytan .radio-item {
+                    display: flex;
+                    align-items: center;
+                    background: var(--input-bg);
+                    padding: 8px 12px;
+                    border-radius: 8px;
+                    border: 1px solid #403127;
+                }
+        #widokPytan .radio-item input[type="radio"] {
+                    width: auto;
+                    margin-right: 10px;
+                    cursor: pointer;
+                }
+        #widokPytan .img-preview-container {
+                    margin-top: 8px;
+                    text-align: center;
+                    background: #151210;
+                    border: 1px dashed #403127;
+                    border-radius: 8px;
+                    padding: 10px;
+                    display: none;
+                }
+        #widokPytan .img-preview-container img {
+                    max-width: 100%;
+                    max-height: 180px;
+                    border-radius: 6px;
+                    object-fit: contain;
+                }
+        #widokPytan .img-preview-status {
+                    font-size: 12px;
+                    color: var(--text-muted);
+                    margin-top: 5px;
+                }
+        #widokPytan .btn-main {
+                    width: 100%;
+                    padding: 14px;
+                    margin-top: 10px;
+                    border: 1px solid var(--border-color);
+                    border-radius: 10px;
+                    background: var(--accent-color);
+                    color: #1F1A17;
+                    font-size: 16px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: all 0.25s ease;
+                }
+        #widokPytan .btn-main:hover:not(:disabled) {
+                    background: var(--accent-hover);
+                    box-shadow: 0 0 15px rgba(230, 120, 23, 0.35);
+                    transform: translateY(-2px);
+                }
+        #widokPytan .btn-main:disabled {
+                    background: #403127;
+                    color: #776B61;
+                    cursor: not-allowed;
+                }
+        #widokPytan .btn-cancel {
+                    background: transparent;
+                    border: 1px solid #f87171;
+                    color: #f87171;
+                    margin-top: 8px;
+                    display: none;
+                }
+        #widokPytan .btn-cancel:hover {
+                    background: rgba(248, 113, 113, 0.15);
+                }
+        #widokPytan .questions-list {
+                    max-height: 650px;
+                    overflow-y: auto;
+                    padding-right: 5px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 12px;
+                }
+        #widokPytan .question-card {
+                    background: #151210;
+                    border: 1px solid #403127;
+                    border-radius: 10px;
+                    padding: 14px;
+                    position: relative;
+                }
+        #widokPytan .question-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    margin-bottom: 8px;
+                    font-weight: bold;
+                }
+        #widokPytan .question-title {
+                    font-size: 15px;
+                    color: var(--text-color);
+                    padding-right: 60px;
+                }
+        #widokPytan .question-actions {
+                    position: absolute;
+                    top: 12px;
+                    right: 12px;
+                    display: flex;
+                    gap: 6px;
+                }
+        #widokPytan .icon-btn {
+                    background: #251e19;
+                    border: 1px solid #403127;
+                    color: var(--text-muted);
+                    border-radius: 6px;
+                    padding: 4px 8px;
+                    cursor: pointer;
+                    font-size: 13px;
+                    transition: all 0.2s;
+                }
+        #widokPytan .icon-btn.edit:hover {
+                    color: var(--accent-color);
+                    border-color: var(--accent-color);
+                }
+        #widokPytan .icon-btn.del:hover {
+                    color: #f87171;
+                    border-color: #f87171;
+                }
+        #widokPytan .list-img-preview {
+                    max-width: 100%;
+                    max-height: 120px;
+                    border-radius: 6px;
+                    margin: 6px 0;
+                    border: 1px solid #403127;
+                }
+        #widokPytan .answers-preview {
+                    font-size: 13px;
+                    margin-top: 8px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 4px;
+                }
+        #widokPytan .ans-item {
+                    color: #A09388;
+                    padding: 3px 6px;
+                    border-radius: 4px;
+                }
+        #widokPytan .ans-item.correct {
+                    color: #4ade80;
+                    background: rgba(74, 222, 128, 0.1);
+                    font-weight: 600;
+                }
+        #widokPytan #status {
+                    margin-top: 15px;
+                    padding: 12px;
+                    border-radius: 8px;
+                    text-align: center;
+                    font-weight: 600;
+                    display: none;
+                }
+        #widokPytan .success {
+                    background: rgba(74, 222, 128, 0.15);
+                    color: #4ade80;
+                    border: 1px solid rgba(74, 222, 128, 0.3);
+                    display: block !important;
+                }
+        #widokPytan .error {
+                    background: rgba(248, 113, 113, 0.15);
+                    color: #f87171;
+                    border: 1px solid rgba(248, 113, 113, 0.3);
+                    display: block !important;
+                }
+        #widokPytan .empty-info {
+                    text-align: center;
+                    color: var(--text-muted);
+                    padding: 40px 0;
+                }
     </style>
 </head>
 
@@ -159,10 +441,12 @@
         <h1 id="tytul"></h1>
 
         <div class="tabs">
-            <button class="tab active" data-egzamin="motorowodni">⚓ Motorowodni</button>
-            <button class="tab" data-egzamin="holownik">🚤 Holownik</button>
+            <button class="tab active" data-widok="motorowodni">⚓ Wyniki: Motorowodni</button>
+            <button class="tab" data-widok="holownik">🚤 Wyniki: Holownik</button>
+            <button class="tab" data-widok="pytania">📝 Baza pytań</button>
         </div>
 
+        <div id="widokWynikow">
         <div id="blad" class="blad" hidden></div>
 
         <div class="section">
@@ -189,11 +473,99 @@
             <h2>🟩 Profil kandydata</h2>
             <div id="profile">Kliknij kandydata, aby załadować szczegółowy arkusz odpowiedzi</div>
         </div>
+        </div><!-- /widokWynikow -->
+
+        <div id="widokPytan" hidden>
+        <!-- Zakładki wyboru bazy -->
+        <div class="tab-navigation">
+            <button id="tabMotorowodni" class="tab-btn active" onclick="wybierzKategorie('baza_pytan', 'ZESTAW_1aHL', 75, this)">
+                🚤 Sternik Motorowodny
+            </button>
+            <button id="tabHolownik" class="tab-btn" onclick="wybierzKategorie('baza_pytan_holownik', 'HOLOWNIK_ZESTAW_1', 25, this)">
+                🏄 Holownik Narciarza
+            </button>
+        </div>
+
+        <div class="layout-grid">
+            <!-- Formularz edycji/dodawania -->
+            <div class="box">
+                <h2 id="formTitle">
+                    ➕ Dodaj Pytanie
+                    <span id="limitBadge" class="badge">Limit: max 75</span>
+                </h2>
+
+                <form id="questionForm" onsubmit="obsluzZapis(event)">
+                    <!-- Nazwa Zestawu -->
+                    <div class="form-group">
+                        <label for="zestawInput">Identyfikator Zestawu (Dokumentu):</label>
+                        <input id="zestawInput" type="text" required onchange="pobierzIPokazPytania()">
+                    </div>
+
+                    <!-- Treść pytania -->
+                    <div class="form-group">
+                        <label for="trescInput">Treść pytania:</label>
+                        <textarea id="trescInput" required placeholder="Wpisz treść pytania..."></textarea>
+                    </div>
+
+                    <!-- Obrazek opcjonalnie z podglądem -->
+                    <div class="form-group">
+                        <label for="obrazekInput">Nazwa pliku/Ścieżka obrazka na GitHubie (opcjonalnie):</label>
+                        <input id="obrazekInput" type="text" placeholder="np. znaki/znak1.png lub nazwa_pliku.jpg" oninput="aktualizujPodgladObrazka()">
+                        <div id="imgPreviewBox" class="img-preview-container">
+                            <img id="imgPreview" src="" alt="Podgląd">
+                            <div id="imgPreviewStatus" class="img-preview-status"></div>
+                        </div>
+                    </div>
+
+                    <!-- Odpowiedzi -->
+                    <div class="form-group">
+                        <label>Odpowiedzi (zaznacz poprawną):</label>
+                        <div class="radio-group">
+                            <div class="radio-item">
+                                <input type="radio" name="poprawna" value="0" checked>
+                                <input type="text" class="odp-input" required placeholder="Odpowiedź A">
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio" name="poprawna" value="1">
+                                <input type="text" class="odp-input" required placeholder="Odpowiedź B">
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio" name="poprawna" value="2">
+                                <input type="text" class="odp-input" required placeholder="Odpowiedź C">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="submitBtn" class="btn-main">Dodaj Pytanie do Bazy</button>
+                    <button type="button" id="cancelBtn" class="btn-main btn-cancel" onclick="anulujEdycje()">Anuluj Edycję</button>
+                </form>
+
+                <div id="status"></div>
+            </div>
+
+            <!-- Podgląd pytania w zestawie -->
+            <div class="box">
+                <h2>
+                    📋 Istniejące Pytania
+                    <span id="counterBadge" class="badge">0 pytań</span>
+                </h2>
+
+                <div style="margin-bottom: 14px;">
+                    <button type="button" class="btn-main" style="margin-top:0;" onclick="document.getElementById('importFile').click()">📥 Importuj zestaw z pliku JSON</button>
+                    <input id="importFile" type="file" accept=".json,application/json" style="display:none" onchange="importujZJSON(event)">
+                </div>
+
+                <div id="questionsContainer" class="questions-list">
+                    <div class="empty-info">Wczytywanie pytań z Firebase...</div>
+                </div>
+            </div>
+        </div>
+        </div><!-- /widokPytan -->
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getFirestore, getDocs, collection, deleteDoc, doc, getDoc }
+        import { getFirestore, getDocs, collection, deleteDoc, doc, getDoc, setDoc }
             from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
             from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -298,12 +670,14 @@
             $("logoutBtn").hidden = !user;
             $("app").hidden = !user;
             if (user) {
-                load();
+                otworzWidok(aktualnyWidok);
             } else {
                 // po wylogowaniu usuwamy dane z pamięci strony
                 allData = [];
                 $("users").innerHTML = "";
                 $("profile").textContent = "";
+                aktualnePytania = [];
+                $("questionsContainer").innerHTML = "";
             }
         });
 
@@ -530,17 +904,365 @@
         }
 
         // ===========================================================
-        // Przełączanie zakładek
+        // Przełączanie zakładek: wyniki egzaminów / baza pytań
         // ===========================================================
-        document.querySelectorAll(".tab").forEach(btn => {
-            btn.addEventListener("click", () => {
-                if (btn.dataset.egzamin === aktywny) return;
-                aktywny = btn.dataset.egzamin;
-                document.querySelectorAll(".tab").forEach(b => b.classList.toggle("active", b === btn));
+        let aktualnyWidok = "motorowodni";
+
+        function otworzWidok(w) {
+            aktualnyWidok = w;
+            const pytania = (w === "pytania");
+            $("widokWynikow").hidden = pytania;
+            $("widokPytan").hidden = !pytania;
+            document.querySelectorAll(".tab").forEach(b => b.classList.toggle("active", b.dataset.widok === w));
+
+            if (pytania) {
+                $("tytul").textContent = "📝 Zarządzanie bazą pytań";
+                $("zestawInput").value = aktualnyZestawId;
+                pobierzIPokazPytania();
+            } else {
+                aktywny = w;
                 $("search").value = "";
                 load();
+            }
+        }
+
+        document.querySelectorAll(".tab").forEach(btn => {
+            btn.addEventListener("click", () => {
+                if (btn.dataset.widok === aktualnyWidok) return;
+                otworzWidok(btn.dataset.widok);
             });
         });
+        // ===========================================================
+        // Baza pytań (dawny plik Dodawanie_Pytań.html)
+        // ===========================================================
+        // =========================================================================
+        // TUTAJ WKLIM Swoją ścieżkę do obrazków na GitHubie (np. GitHub Pages lub raw)!
+        // Przykłady:
+        // - GitHub Pages: "https://twoja-nazwa.github.io/twoje-repo/"
+        // - Raw GitHub:   "https://raw.githubusercontent.com/user/repo/main/"
+        // (Zostaw puste "" jeśli w polu obrazka wklejasz zawsze pełny link HTTP)
+        // =========================================================================
+        const GITHUB_BASE_URL = "";
+
+        // Stan aplikacji
+        let aktualnaKolekcja = "baza_pytan";
+        let aktualnyZestawId = "ZESTAW_1aHL";
+        let maxLimitPytan = 75;
+        let aktualnePytania = [];
+        let edytowanyIndex = -1;
+
+        // Import całego zestawu z pliku JSON (zastępuje pytania w aktualnym zestawie)
+        window.importujZJSON = async function(e) {
+            const plik = e.target.files[0];
+            e.target.value = "";
+            if (!plik) return;
+
+            let dane;
+            try {
+                dane = JSON.parse(await plik.text());
+            } catch (err) {
+                pokazStatus("❌ Plik nie jest poprawnym JSON-em: " + err.message, "error");
+                return;
+            }
+
+            if (!Array.isArray(dane) || dane.length === 0) {
+                pokazStatus("❌ JSON musi być niepustą listą pytań.", "error");
+                return;
+            }
+            if (dane.length > maxLimitPytan) {
+                pokazStatus(`❌ Plik ma ${dane.length} pytań, a limit tej bazy to ${maxLimitPytan}.`, "error");
+                return;
+            }
+            const bledne = dane.findIndex(p => !p || typeof p.tresc !== "string" || !Array.isArray(p.odp) || p.odp.length !== 3);
+            if (bledne !== -1) {
+                pokazStatus(`❌ Pytanie nr ${bledne + 1} ma zły format (potrzebne: tresc oraz dokładnie 3 odpowiedzi w odp).`, "error");
+                return;
+            }
+
+            if (!confirm(`Zastąpić zawartość zestawu "${aktualnyZestawId}" (${aktualnePytania.length} pytań) nowymi ${dane.length} pytaniami z pliku?`)) return;
+
+            const stare = aktualnePytania;
+            anulujEdycje();
+            aktualnePytania = dane.map((p, i) => {
+                const nowe = {
+                    id: i + 1,
+                    tresc: p.tresc.trim(),
+                    odp: p.odp.map(o => String(o).trim()),
+                    poprawna: Number.isInteger(p.poprawna) && p.poprawna >= 0 && p.poprawna <= 2 ? p.poprawna : null
+                };
+                // obrazek: z pliku, a jeśli go brak – zachowaj dotychczasowy z bazy (ta sama pozycja)
+                const obr = p.obrazek || (stare[i] && stare[i].obrazek);
+                if (obr) nowe.obrazek = obr;
+                return nowe;
+            });
+
+            await zapiszZestawDoFirebase(`✓ Zaimportowano ${aktualnePytania.length} pytań.`);
+        };
+
+        // Pomocnik składający URL z GitHuba
+        function uzyskajURLGitHub(path) {
+            if (!path) return "";
+            if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("data:")) {
+                return path;
+            }
+            // Doklejanie prefiksu GitHub, jeśli jest zdefiniowany
+            const cleanBase = GITHUB_BASE_URL.endsWith('/') ? GITHUB_BASE_URL : GITHUB_BASE_URL + '/';
+            const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+            return GITHUB_BASE_URL ? cleanBase + cleanPath : cleanPath;
+        }
+
+        // Przełączanie zakładki
+        window.wybierzKategorie = function(kolekcja, domyslnyZestaw, limit, elementPrzycisk) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            elementPrzycisk.classList.add('active');
+
+            aktualnaKolekcja = kolekcja;
+            aktualnyZestawId = domyslnyZestaw;
+            maxLimitPytan = limit;
+
+            document.getElementById("zestawInput").value = domyslnyZestaw;
+            document.getElementById("limitBadge").textContent = `Limit: max ${limit}`;
+            
+            anulujEdycje();
+            pobierzIPokazPytania();
+        };
+
+        // Aktualizacja podglądu obrazka w formularzu
+        window.aktualizujPodgladObrazka = function() {
+            const inputVal = document.getElementById("obrazekInput").value.trim();
+            const box = document.getElementById("imgPreviewBox");
+            const img = document.getElementById("imgPreview");
+            const status = document.getElementById("imgPreviewStatus");
+
+            if (!inputVal) {
+                box.style.display = "none";
+                return;
+            }
+
+            box.style.display = "block";
+            status.textContent = "Ładowanie podglądu...";
+            img.style.display = "none";
+
+            const finalUrl = uzyskajURLGitHub(inputVal);
+
+            img.onload = () => {
+                img.style.display = "inline-block";
+                status.textContent = "";
+            };
+            img.onerror = () => {
+                img.style.display = "none";
+                status.textContent = "❌ Nie znaleziono obrazka pod adresem: " + finalUrl;
+            };
+            img.src = finalUrl;
+        };
+
+        // Pobieranie pytań z Firestore
+        window.pobierzIPokazPytania = async function() {
+            const container = document.getElementById("questionsContainer");
+            const zestawId = document.getElementById("zestawInput").value.trim();
+            aktualnyZestawId = zestawId;
+            if (edytowanyIndex !== -1) anulujEdycje();
+
+            if (!zestawId) {
+                container.innerHTML = `<div class="empty-info">Podaj nazwę zestawu, aby wczytać pytania.</div>`;
+                return;
+            }
+
+            container.innerHTML = `<div class="empty-info">Wczytywanie...</div>`;
+
+            try {
+                const docRef = doc(db, aktualnaKolekcja, zestawId);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists() && docSnap.data().pytania) {
+                    aktualnePytania = docSnap.data().pytania;
+                } else {
+                    aktualnePytania = [];
+                }
+
+                wyswietlListePytan();
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `<div class="empty-info" style="color: #f87171;">Błąd pobierania pytań: ${err.message}</div>`;
+            }
+        };
+
+        // Renderowanie listy pytań po prawej stronie
+        function wyswietlListePytan() {
+            const container = document.getElementById("questionsContainer");
+            const counterBadge = document.getElementById("counterBadge");
+
+            const bezPoprawnej = aktualnePytania.filter(p => !Number.isInteger(p.poprawna)).length;
+            counterBadge.textContent = `${aktualnePytania.length} / ${maxLimitPytan} pytań` + (bezPoprawnej ? ` · ⚠ ${bezPoprawnej} bez odp.` : "");
+
+            if (aktualnePytania.length === 0) {
+                container.innerHTML = `<div class="empty-info">Brak pytań w tym zestawie. Dodaj pierwsze!</div>`;
+                return;
+            }
+
+            container.innerHTML = aktualnePytania.map((pyt, index) => {
+                let imgHtml = "";
+                if (pyt.obrazek) {
+                    const imgUrl = uzyskajURLGitHub(pyt.obrazek);
+                    imgHtml = `<div><img class="list-img-preview" src="${esc(imgUrl)}" alt="Obrazek pytania" onerror="this.style.display='none'"></div>`;
+                }
+
+                return `
+                    <div class="question-card">
+                        <div class="question-header">
+                            <div class="question-title">${index + 1}. ${esc(pyt.tresc)}${Number.isInteger(pyt.poprawna) ? "" : ' <span style="color:#f87171;">⚠ zaznacz poprawną</span>'}</div>
+                            <div class="question-actions">
+                                <button class="icon-btn edit" onclick="zaladujDoEdycji(${index})" title="Edytuj">✏️</button>
+                                <button class="icon-btn del" onclick="usunPytanie(${index})" title="Usuń">🗑️</button>
+                            </div>
+                        </div>
+                        ${imgHtml}
+                        <div class="answers-preview">
+                            ${pyt.odp.map((ans, i) => `
+                                <div class="ans-item ${i === pyt.poprawna ? 'correct' : ''}">
+                                    ${String.fromCharCode(65 + i)}) ${esc(ans)} ${i === pyt.poprawna ? '✓' : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Ładowanie pytania do formularza
+        window.zaladujDoEdycji = function(index) {
+            const pyt = aktualnePytania[index];
+            if (!pyt) return;
+
+            edytowanyIndex = index;
+            document.getElementById("trescInput").value = pyt.tresc;
+            document.getElementById("obrazekInput").value = pyt.obrazek || "";
+            
+            const odpInputs = document.querySelectorAll(".odp-input");
+            pyt.odp.forEach((odpowiedzText, i) => {
+                if (odpInputs[i]) odpInputs[i].value = odpowiedzText;
+            });
+
+            const radioButtons = document.querySelectorAll('input[name="poprawna"]');
+            radioButtons.forEach(r => r.checked = false);
+            if (radioButtons[pyt.poprawna]) {
+                radioButtons[pyt.poprawna].checked = true;
+            }
+
+            document.getElementById("formTitle").childNodes[0].nodeValue = "✏️ Edytuj Pytanie #" + (index + 1) + " ";
+            document.getElementById("submitBtn").textContent = "Zapisz Zmiany w Pytaniu";
+            document.getElementById("cancelBtn").style.display = "block";
+
+            aktualizujPodgladObrazka();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        // Anulowanie edycji
+        window.anulujEdycje = function() {
+            edytowanyIndex = -1;
+            const zestawInput = document.getElementById("zestawInput");
+            const zachowanyZestaw = zestawInput.value;
+            document.getElementById("questionForm").reset();
+            zestawInput.value = zachowanyZestaw; // reset() nie może czyścić identyfikatora zestawu
+            document.getElementById("formTitle").childNodes[0].nodeValue = "➕ Dodaj Pytanie ";
+            document.getElementById("submitBtn").textContent = "Dodaj Pytanie do Bazy";
+            document.getElementById("cancelBtn").style.display = "none";
+            document.getElementById("imgPreviewBox").style.display = "none";
+        };
+
+        // Usuwanie pytania
+        window.usunPytanie = async function(index) {
+            if (!confirm(`Czy na pewno chcesz usunąć pytanie nr ${index + 1}?`)) return;
+
+            aktualnePytania.splice(index, 1);
+            aktualnePytania.forEach((p, idx) => p.id = idx + 1);
+
+            anulujEdycje();
+            await zapiszZestawDoFirebase("Pytanie zostało usunięte!");
+        };
+
+        // Obsługa zapisu (dodawanie lub edycja)
+        window.obsluzZapis = async function(e) {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById("submitBtn");
+            const tresc = document.getElementById("trescInput").value.trim();
+            const obrazek = document.getElementById("obrazekInput").value.trim();
+            const odpInputs = document.querySelectorAll(".odp-input");
+            const odpowiedzi = Array.from(odpInputs).map(i => i.value.trim());
+            const zaznaczona = document.querySelector('input[name="poprawna"]:checked');
+            if (!zaznaczona) {
+                pokazStatus("❌ Zaznacz poprawną odpowiedź.", "error");
+                return;
+            }
+            const poprawnaIdx = parseInt(zaznaczona.value);
+
+            if (edytowanyIndex === -1 && aktualnePytania.length >= maxLimitPytan) {
+                pokazStatus(`❌ Osiągnięto limit! Ten zestaw zawiera już ${maxLimitPytan} pytań.`, "error");
+                return;
+            }
+
+            submitBtn.disabled = true;
+
+            const danePytania = {
+                id: edytowanyIndex >= 0 ? edytowanyIndex + 1 : aktualnePytania.length + 1,
+                tresc: tresc,
+                odp: odpowiedzi,
+                poprawna: poprawnaIdx
+            };
+
+            if (obrazek) {
+                danePytania.obrazek = obrazek;
+            }
+
+            if (edytowanyIndex >= 0) {
+                aktualnePytania[edytowanyIndex] = danePytania;
+            } else {
+                aktualnePytania.push(danePytania);
+            }
+
+            const wiadomosc = edytowanyIndex >= 0 ? "✓ Zmiany zostały zapisane!" : "✓ Pytanie dodane pomyślnie!";
+            const sukces = await zapiszZestawDoFirebase(wiadomosc);
+
+            if (sukces) {
+                anulujEdycje();
+            }
+            submitBtn.disabled = false;
+        };
+
+        // Zapis tablicy pytań do bazy
+        async function zapiszZestawDoFirebase(komunikatSukcesu) {
+            try {
+                const docRef = doc(db, aktualnaKolekcja, aktualnyZestawId);
+                // Numeracja od nowa + usunięcie pól undefined (Firestore ich nie przyjmuje)
+                aktualnePytania = JSON.parse(JSON.stringify(
+                    aktualnePytania.map((p, idx) => ({ ...p, id: idx + 1 }))
+                ));
+                await setDoc(docRef, { pytania: aktualnePytania }, { merge: true });
+                
+                pokazStatus(komunikatSukcesu, "success");
+                wyswietlListePytan();
+                return true;
+            } catch (err) {
+                console.error(err);
+                pokazStatus("Błąd zapisu w Firebase: " + err.message, "error");
+                return false;
+            }
+        }
+
+        let statusTimeout = null;
+        function pokazStatus(msg, type) {
+            const statusDiv = document.getElementById("status");
+            clearTimeout(statusTimeout);
+            statusDiv.style.display = "";
+            statusDiv.className = type;
+            statusDiv.textContent = msg;
+            statusTimeout = setTimeout(() => {
+                statusDiv.className = "";
+                statusDiv.style.display = "none";
+            }, 4000);
+        }
+
     </script>
 </body>
 
