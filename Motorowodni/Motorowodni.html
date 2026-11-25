@@ -3,8 +3,13 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>SHOWteam - Sternik Motorowodny: egzamin i fiszki</title>
     <link rel="icon" type="image/x-icon" href="icon.ico">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
     <style>
         body {
@@ -201,7 +206,7 @@
             }
         }
 
-        /* ===== Fiszki ===== */
+        /* ==Fiszki== */
         .srodek { text-align: center; }
         .muted { color: #B5A79D; font-size: 14px; }
         .opis { color: #B5A79D; line-height: 1.5; margin-top: 0; }
@@ -301,7 +306,7 @@
         .wynik {
             font-size: 28px;
             font-weight: 800;
-            color: #38bdf8;
+            color: #FF6B1A;
             margin: 10px 0;
         }
 
@@ -313,15 +318,73 @@
             line-height: 1.4;
             opacity: 0.85;
         }
+    
+        /* ==Motyw zgodny z showteam.eu== */
+        :root { --or: #FF6B1A; --bg: #0a0f14; --tx: #F5F3EC; --mut: #B5A79D; }
+        body {
+            background: radial-gradient(ellipse at 80% 0%, #1b2a3a 0%, #0a0f14 55%, #05080b 100%);
+            font-family: "Inter", Arial, sans-serif;
+            display: flex; flex-direction: column; justify-content: flex-start; align-items: stretch;
+            min-height: 100vh; color: var(--tx);
+        }
+        .topbar {
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+            padding: 14px max(16px, 4vw); background: #05080b; border-bottom: 1px solid rgba(255,255,255,.07);
+        }
+        .topbar .logo { display: flex; align-items: center; color: var(--tx); text-decoration: none;
+            font-family: "Anton", Impact, sans-serif; font-size: 22px; letter-spacing: 1px; }
+        .topbar .logo img { height: 46px; width: auto; display: block; }
+        .topbar nav { display: flex; align-items: center; gap: 18px; }
+        .topbar nav a { color: var(--mut); text-decoration: none; font-size: 14px; font-weight: 600; }
+        .topbar nav a:hover { color: var(--tx); }
+        .topbar .cta { background: var(--or); color: #1a0d03 !important; padding: 12px 18px; font-weight: 700; }
+        .topbar .cta:hover { background: #ff8340; }
+        .box { margin: 28px auto; width: calc(100% - 32px); max-width: 900px;
+            background: rgba(10,15,20,.93); border: 1px solid rgba(255,255,255,.08); border-top: 3px solid var(--or);
+            border-radius: 0; box-shadow: 0 20px 60px rgba(0,0,0,.6); }
+        h1 { font-family: "Anton", "Bebas Neue", Impact, sans-serif; font-weight: 400; text-transform: uppercase;
+            letter-spacing: 1.5px; font-size: clamp(30px, 6vw, 52px); line-height: 1.05; color: var(--or); text-shadow: none; }
+        h2 { color: var(--tx); }
+        button { border-radius: 0; background: #11181f; color: var(--tx); border: 1px solid rgba(255,255,255,.14); }
+        button:hover:not(:disabled) { background: var(--or); color: #1a0d03; border-color: var(--or); box-shadow: none; }
+        #btnEgzamin, #startBtn, #fAkcja, [data-takcja="odkryj"], [data-takcja="wiem"] {
+            background: var(--or); color: #1a0d03; border-color: var(--or); }
+        #btnEgzamin:hover:not(:disabled), #startBtn:hover:not(:disabled), #fAkcja:hover:not(:disabled),
+        [data-takcja="odkryj"]:hover, [data-takcja="wiem"]:hover { background: #ff8340; }
+        button:disabled { background: #10161c; color: #5d6670; border-color: rgba(255,255,255,.06); }
+        .input-wrapper { border-radius: 0; background: #0a0f14; border-color: #2a333c; }
+        .input-wrapper:focus-within { border-color: var(--or); box-shadow: 0 0 0 3px rgba(255,107,26,.18); }
+        .input-label { color: var(--mut); }
+        .progress-inner { background: var(--or) !important; }
+        .site-footer { margin-top: auto; padding: 22px max(16px, 4vw); background: #05080b;
+            border-top: 1px solid rgba(255,255,255,.07); color: var(--mut); font-size: 13px;
+            display: flex; flex-wrap: wrap; gap: 8px 22px; justify-content: space-between; }
+        .site-footer a { color: var(--mut); text-decoration: none; }
+        .site-footer a:hover { color: var(--or); }
+        .site-footer b { font-family: "Anton", Impact, sans-serif; font-weight: 400; letter-spacing: 1px; color: var(--tx); }
     </style>
 </head>
 
 <body>
+    <header class="topbar">
+        <a class="logo" href="https://showteam.eu/" aria-label="SHOWteam">
+            <img src="https://showteam.eu/_cstd/image/asset/runtime/2fda01d7bc92bc083bcbe57fedab198c493f7cd8df358083db37bf17f86bf620.svg" alt="SHOWteam" onerror="this.replaceWith(document.createTextNode('SHOWteam'))">
+        </a>
+        <nav>
+            <a href="https://showteam.eu/">Strona główna</a>
+        </nav>
+    </header>
     <div class="box">
-        <h1 id="tytul">=== Sternik Motorowodny ===</h1>
+        <h1 id="tytul">Sternik Motorowodny</h1>
         <div id="app"></div>
     </div>
 
+    <footer class="site-footer">
+        <span><b>Love the things that make you happy.</b></span>
+        <span><a href="mailto:biuro@showteam.eu">biuro@showteam.eu</a> &nbsp;·&nbsp;
+            <a href="https://showteam.eu/kontakt">Kontakt i o nas</a></span>
+        <span>© 2026 SHOWteam · Poręba · Śląsk · Polska</span>
+    </footer>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getFirestore, addDoc, collection, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -409,7 +472,7 @@
         }
 
         window.start = function () {
-            ustawTytul("=== Sternik Motorowodny ===");
+            ustawTytul("Sternik Motorowodny");
             document.body.style.height = "";
             document.body.style.padding = "";
 
@@ -455,6 +518,7 @@
         let poprawne = 0;
         let index = 0;
         let wybranyZestaw = "";
+        let pokazanoO = 0;   // czas wyświetlenia pytania (ochrona przed podwójnym tapnięciem)
 
         // Ustawienia tego quizu
         const KOLEKCJA_WYNIKOW = "motorowodni";
@@ -463,7 +527,7 @@
         window.startQuiz = async function () {
             if (!pobierzImie()) return;
 
-            ustawTytul("=== Egzamin Motorowodny ===");
+            ustawTytul("Egzamin Motorowodny");
 
             const losowyIndeks = Math.floor(Math.random() * dostepneZestawy.length);
             wybranyZestaw = dostepneZestawy[losowyIndeks];
@@ -474,7 +538,12 @@
                 const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
-                    pytania = docSnap.data().pytania;
+                    pytania = (docSnap.data().pytania || []).filter(fPoprawnePytanie);
+                    if (!pytania.length) {
+                        alert("Ten zestaw nie zawiera poprawnych pytań!");
+                        start();
+                        return;
+                    }
                 } else {
                     alert("Wystąpił problem z konfiguracją arkuszy w bazie danych!");
                     start();
@@ -522,26 +591,28 @@
                 </div>
                 <h2 class="fade">
                     Pytanie ${index + 1} z ${pytania.length}<br><br>
-                    ${p.tresc}
+                    ${esc(p.tresc)}
                 </h2>
             `;
 
             if (p.obrazek) {
-                html += `<img src="${p.obrazek}" alt="Rysunek pomocniczy" class="question-img fade">`;
+                html += `<img src="${esc(srcObrazka(p.obrazek))}" alt="Rysunek pomocniczy" class="question-img fade">`;
             }
 
             idx.forEach((i) => {
                 html += `
                     <button class="fade" onclick="wybierz(${i.idx})">
-                        ${i.tekst}
+                        ${esc(i.tekst)}
                     </button>
                 `;
             });
 
             appDiv.innerHTML = html;
+            pokazanoO = Date.now();
         }
 
         window.wybierz = function (i) {
+            if (Date.now() - pokazanoO < 400) return;
             let p = pytania[index];
             const czyPoprawna = i === p.poprawna;
             if (czyPoprawna) poprawne++;
@@ -589,13 +660,13 @@
             let podsumowanieSzczegolowe = "";
             wybory.forEach((w) => {
                 podsumowanieSzczegolowe += `
-                    <div style="text-align: left; background: #0b1524; padding: 15px; border-radius: 8px; margin-bottom: 12px; border: 1px solid ${w.wynik ? 'rgba(74, 222, 128, 0.4)' : 'rgba(248, 113, 113, 0.4)'}; border-left: 5px solid ${w.wynik ? '#4ade80' : '#f87171'}">
-                        <p style="margin: 0 0 8px 0; font-weight: bold; font-size: 15px; color: #f1f5f9;">Pytanie ${w.NumerPytania}: ${w.pytanie}</p>
-                        ${w.obrazek ? `<img src="${w.obrazek}" style="max-width:250px;display:block;margin:10px auto;border-radius:8px;box-shadow:0 4px 15px rgba(0,0,0,.5);">` : ""}
+                    <div style="text-align: left; background: #10161c; padding: 15px; border-radius: 8px; margin-bottom: 12px; border: 1px solid ${w.wynik ? 'rgba(74, 222, 128, 0.4)' : 'rgba(248, 113, 113, 0.4)'}; border-left: 5px solid ${w.wynik ? '#4ade80' : '#f87171'}">
+                        <p style="margin: 0 0 8px 0; font-weight: bold; font-size: 15px; color: #F5F3EC;">Pytanie ${w.NumerPytania}: ${esc(w.pytanie)}</p>
+                        ${srcObrazka(w.obrazek) ? `<img src="${esc(srcObrazka(w.obrazek))}" style="max-width:250px;display:block;margin:10px auto;border-radius:8px;box-shadow:0 4px 15px rgba(0,0,0,.5);">` : ""}
                         <p style="margin: 4px 0; font-size: 14px; color: ${w.wynik ? '#4ade80' : '#f87171'}">
-                            <strong>Twoja odpowiedź:</strong> ${w.odpowiedz} ${w.wynik ? '✓' : '✗'}
+                            <strong>Twoja odpowiedź:</strong> ${esc(w.odpowiedz)} ${w.wynik ? '✓' : '✗'}
                         </p>
-                        ${!w.wynik ? `<p style="margin: 4px 0; font-size: 14px; color: #4ade80"><strong>Poprawna odpowiedź:</strong> ${w.poprawna}</p>` : ''}
+                        ${!w.wynik ? `<p style="margin: 4px 0; font-size: 14px; color: #4ade80"><strong>Poprawna odpowiedź:</strong> ${esc(w.poprawna)}</p>` : ''}
                     </div>
                 `;
             });
@@ -616,9 +687,9 @@
             appDiv.innerHTML = `
                 <div style="text-align:center;" class="fade">
                     <h2>Egzamin zakończony!</h2>
-                    <p style="font-size: 18px; color: #94a3b8;"><strong>${esc(daneGracza)}</strong></p>
-                    <p style="font-size: 16px; color: #e2e8f0; margin-top:5px;">Wynik egzaminu: ${statusEgzaminu}</p>
-                    <h2 style="color: #38bdf8; margin-top: 10px; margin-bottom: 25px; text-shadow: 0 0 10px rgba(56, 189, 248, 0.3);">
+                    <p style="font-size: 18px; color: #B5A79D;"><strong>${esc(daneGracza)}</strong></p>
+                    <p style="font-size: 16px; color: #F5F3EC; margin-top:5px;">Wynik egzaminu: ${statusEgzaminu}</p>
+                    <h2 style="color: #FF6B1A; margin-top: 10px; margin-bottom: 25px; text-shadow: 0 0 10px rgba(255,107,26,0.3);">
                         Twój wynik: ${poprawne} / ${pytania.length}<br>
                         Procent: ${procent}%
                     </h2>
@@ -672,7 +743,7 @@
         }
 
         async function fWczytaj() {
-            ustawTytul("=== Fiszki – Sternik Motorowodny ===");
+            ustawTytul("Fiszki – Sternik Motorowodny");
             appDiv.innerHTML = `<h2 class="srodek">Wczytywanie pytań...</h2>`;
 
             const ids = dostepneZestawy;
