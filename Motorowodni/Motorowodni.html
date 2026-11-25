@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>SHOWteam — Patent Sternika Motorowodnego</title>
+    <title>SHOWteam - Sternik Motorowodny: egzamin i fiszki</title>
     <link rel="icon" type="image/x-icon" href="icon.ico">
 
     <style>
@@ -200,12 +200,125 @@
                 transform: translateY(0);
             }
         }
+
+        /* ===== Fiszki ===== */
+        .srodek { text-align: center; }
+        .muted { color: #B5A79D; font-size: 14px; }
+        .opis { color: #B5A79D; line-height: 1.5; margin-top: 0; }
+        .ok { color: #4ade80; }
+        .zle-txt { color: #f87171; }
+
+        .pasek {
+            display: flex;
+            justify-content: space-between;
+            color: #B5A79D;
+            font-size: 14px;
+            margin-bottom: 14px;
+        }
+
+        .komunikat {
+            background: rgba(248, 113, 113, 0.12);
+            border: 1px solid rgba(248, 113, 113, 0.4);
+            color: #fecaca;
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin-bottom: 14px;
+            font-size: 14px;
+        }
+
+
+        .odp {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-align: left;
+        }
+
+        .odp .nr {
+            flex: 0 0 auto;
+            min-width: 24px;
+            height: 24px;
+            line-height: 24px;
+            text-align: center;
+            border-radius: 6px;
+            background: rgba(230, 120, 23, 0.15);
+            font-size: 13px;
+        }
+
+        .odp.wybrana, .odp.wybrana:hover {
+            background: rgba(230, 120, 23, 0.2) !important;
+            border-color: #E67817 !important;
+            color: #F5F1ED !important;
+            transform: none !important;
+        }
+
+        .odp.dobra, .odp.dobra:hover {
+            background: rgba(74, 222, 128, 0.18) !important;
+            border-color: #4ade80 !important;
+            color: #4ade80 !important;
+            box-shadow: none !important;
+            transform: none !important;
+        }
+
+        .odp.zla, .odp.zla:hover {
+            background: rgba(248, 113, 113, 0.18) !important;
+            border-color: #f87171 !important;
+            color: #f87171 !important;
+            box-shadow: none !important;
+            transform: none !important;
+        }
+
+        .odp.zablokowana { pointer-events: none; }
+        .odp.zablokowana:not(.dobra):not(.zla) { opacity: 0.55; }
+
+        .feedback {
+            padding: 12px 14px;
+            border-radius: 10px;
+            margin: 14px 0 6px 0;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .feedback.dobrze {
+            background: rgba(74, 222, 128, 0.12);
+            border: 1px solid rgba(74, 222, 128, 0.4);
+            color: #4ade80;
+        }
+
+        .feedback.zle {
+            background: rgba(248, 113, 113, 0.12);
+            border: 1px solid rgba(248, 113, 113, 0.4);
+            color: #fecaca;
+        }
+
+        .drugi {
+            background: transparent;
+            border-color: #403127;
+            color: #B5A79D;
+            font-weight: 500;
+        }
+
+        .wynik {
+            font-size: 28px;
+            font-weight: 800;
+            color: #38bdf8;
+            margin: 10px 0;
+        }
+
+        .wybor small {
+            display: block;
+            margin-top: 6px;
+            font-weight: 400;
+            font-size: 12px;
+            line-height: 1.4;
+            opacity: 0.85;
+        }
     </style>
 </head>
 
 <body>
     <div class="box">
-        <h1>=== Egzamin Motorowodny ===</h1>
+        <h1 id="tytul">=== Sternik Motorowodny ===</h1>
         <div id="app"></div>
     </div>
 
@@ -226,79 +339,130 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        let pytania = [];
-        let wybory = [];
-        let poprawne = 0;
-        let index = 0;
-        let daneGracza = "";
-        let wybranyZestaw = "";
+        const appDiv = document.getElementById("app");
+        const $ = id => document.getElementById(id);
 
+        // Zestawy pytań (te same dla egzaminu i fiszek)
         const dostepneZestawy = [
             "ZESTAW_1aHL",
             "ZESTAW_2aHL",
             "ZESTAW_3aHL"
         ];
 
+        // Dane kandydata (wspólne dla obu trybów)
+        let daneGracza = "";
+
+        // ===========================================================
+        // Narzędzia wspólne
+        // ===========================================================
+
+        // Zamiana znaków specjalnych, żeby tekst wpisany przez użytkownika nie był traktowany jak kod HTML
+        function esc(s) {
+            return String(s ?? "").replace(/[&<>"']/g, c => ({
+                "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+            }[c]));
+        }
+
+        function srcObrazka(url) {
+            const s = String(url || "").trim();
+            if (!s) return "";
+            if (/^[a-z][a-z0-9+.-]*:/i.test(s) && !/^(https?:|data:image\/)/i.test(s)) return "";
+            return s;
+        }
+
         function shuffle(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [array[i], array[j]] = [array[j], array[i]];
             }
+            return array;
         }
 
-        function menu() {
-            appDiv.innerHTML = `<button onclick="start()">Start</button>`;
+        function ustawTytul(tekst) {
+            $("tytul").textContent = tekst;
         }
 
-        document.addEventListener("keydown", function (e) {
-            if (e.key === "Enter") {
-                const btn = document.getElementById("startBtn");
-                if (btn && !btn.disabled) {
-                    startQuiz();
-                }
-            }
-        });
+        // ===========================================================
+        // Ekran startowy: imię i nazwisko + wybór trybu
+        // ===========================================================
 
         window.validateNick = function () {
-            const input = document.getElementById("nickInput");
-            const error = document.getElementById("nickError");
-            const btn = document.getElementById("startBtn");
-
+            const input = $("nickInput");
+            const error = $("nickError");
             if (!input) return;
-            let value = input.value.trim();
 
-            if (value.length < 3) {
+            const value = input.value.trim();
+            const ok = value.length >= 3;
+
+            if (value.length === 0) {
+                error.textContent = "";
+            } else if (!ok) {
                 error.textContent = "Wpisz poprawne Imię i Nazwisko (min. 3 znaki)";
                 error.style.color = "#f87171";
-                btn.disabled = true;
             } else {
                 error.textContent = "OK ✓";
-                error.style.color = "#4ade80"; /* Zielony akcent potwierdzenia poprawności nicku */
-                btn.disabled = false;
+                error.style.color = "#4ade80";
             }
+
+            $("btnEgzamin").disabled = !ok;
+            $("btnFiszki").disabled = !ok;
         }
 
         window.start = function () {
+            ustawTytul("=== Sternik Motorowodny ===");
+            document.body.style.height = "";
+            document.body.style.padding = "";
+
             appDiv.innerHTML = `
                 <div class="fade-in">
                     <label class="input-label">Podaj Imię i Nazwisko kandydata</label>
                     <div class="input-wrapper">
                         <span class="icon">👤</span>
-                        <input id="nickInput" maxlength="60" placeholder="Wpisz swoje Imię i Nazwisko..." oninput="validateNick()" autocomplete="off">
+                        <input id="nickInput" maxlength="60" placeholder="Wpisz swoje Imię i Nazwisko..." value="${esc(daneGracza)}" oninput="validateNick()" autocomplete="off">
                     </div>
                     <div id="nickError" class="error"></div>
                 </div>
                 <div class="fade-in" style="animation-delay:0.1s; margin-top: 15px;">
-                    <button id="startBtn" onclick="startQuiz()" disabled>Rozpocznij Test</button>
+                    <button id="btnEgzamin" onclick="startQuiz()" disabled>
+                        📝 Egzamin (test)
+                        <small>Pełny test.</small>
+                    </button>
+                    <button id="btnFiszki" onclick="startFiszki()" disabled>
+                        📚 Fiszki (nauka)
+                        <small>Po każdej odpowiedzi od razu widzisz poprawną.</small>
+                    </button>
                 </div>
             `;
+
+            validateNick();
+            $("nickInput").focus();
         }
 
-        window.startQuiz = async function () {
-            const input = document.getElementById("nickInput");
-            daneGracza = input ? input.value.trim() : "";
+        // Odczytuje imię z pola (jeśli ekran startowy jest widoczny) i sprawdza poprawność
+        function pobierzImie() {
+            const input = $("nickInput");
+            if (input) daneGracza = input.value.trim();
+            return daneGracza.length >= 3;
+        }
 
-            if (daneGracza.length < 3) return;
+        // ===========================================================
+        // TRYB 1: EGZAMIN (wynik zapisywany w bazie)
+        // ===========================================================
+
+        let pytania = [];
+        let wybory = [];
+        let poprawne = 0;
+        let index = 0;
+        let wybranyZestaw = "";
+
+        // Ustawienia tego quizu
+        const KOLEKCJA_WYNIKOW = "motorowodni";
+        const PROG_ZALICZENIA = 65 / 75;   // ułamek poprawnych odpowiedzi potrzebny do zaliczenia
+
+        window.startQuiz = async function () {
+            if (!pobierzImie()) return;
+
+            ustawTytul("=== Egzamin Motorowodny ===");
 
             const losowyIndeks = Math.floor(Math.random() * dostepneZestawy.length);
             wybranyZestaw = dostepneZestawy[losowyIndeks];
@@ -312,20 +476,19 @@
                     pytania = docSnap.data().pytania;
                 } else {
                     alert("Wystąpił problem z konfiguracją arkuszy w bazie danych!");
-                    menu();
+                    start();
                     return;
                 }
             } catch (err) {
                 console.error(err);
                 alert("Błąd połączenia z bazą Firebase!");
-                menu();
+                start();
                 return;
             }
 
             index = 0;
             wybory = [];
             poprawne = 0;
-
 
             pytania.forEach(p => {
                 p.odpowiedziLosowe = [...p.odp].map((x, i) => ({ tekst: x, idx: i }));
@@ -395,17 +558,6 @@
             pokazPytanie();
         }
 
-        // Zamiana znaków specjalnych, żeby tekst wpisany przez użytkownika nie był traktowany jak kod HTML
-        function esc(s) {
-            return String(s ?? "").replace(/[&<>"']/g, c => ({
-                "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-            }[c]));
-        }
-
-        // Ustawienia tego quizu
-        const KOLEKCJA_WYNIKOW = "motorowodni";
-        const PROG_ZALICZENIA = 65 / 75;   // ułamek poprawnych odpowiedzi potrzebny do zaliczenia
-
         async function zapiszWybor() {
             let bladZapisu = "";
             try {
@@ -474,7 +626,8 @@
                         ${podsumowanieSzczegolowe}
                     </div>
 
-                    <button onclick="start()" style="margin-top: 10px; max-width: 200px;">Rozwiąż ponownie</button>
+                    <button onclick="startQuiz()" style="display:block; margin: 10px auto; max-width: 260px;">Rozwiąż ponownie</button>
+                    <button class="drugi" onclick="start()" style="display:block; margin: 8px auto; max-width: 260px;">← Wróć do wyboru</button>
                 </div>
             `;
 
@@ -484,8 +637,232 @@
             }
         }
 
-        const appDiv = document.getElementById("app");
-        menu();
+        // ===========================================================
+        // TRYB 2: FISZKI (tylko odczyt pytań, nic nie jest zapisywane)
+        // ===========================================================
+
+        let fPytania = [];        // wszystkie wczytane pytania ze wszystkich zestawów
+        let fKolejka = [];        // pytania w bieżącej rundzie: { p, odp }
+        let fBledne = [];         // pytania, na które w tej rundzie odpowiedziano źle
+        let fUwagi = "";          // informacje o pominiętych pytaniach / niewczytanych zestawach
+        let fIndex = 0;
+        let fDobre = 0;
+        let fZle = 0;
+        let fWybrana = null;      // oryginalny indeks wybranej odpowiedzi
+        let fZatwierdzone = false;
+
+        function fPoprawnePytanie(p) {
+            return p && typeof p.tresc === "string" && Array.isArray(p.odp) && p.odp.length >= 2
+                && Number.isInteger(p.poprawna) && p.poprawna >= 0 && p.poprawna < p.odp.length;
+        }
+
+        window.startFiszki = function () {
+            if (!pobierzImie()) return;
+            fWczytaj();
+        }
+
+        function fBlad(info) {
+            appDiv.innerHTML = `
+                <div class="srodek fade">
+                    <div class="komunikat">${esc(info)}</div>
+                    <button data-fakcja="ponow">🔄 Spróbuj ponownie</button>
+                    <button class="drugi" data-fakcja="menu">← Wróć do wyboru</button>
+                </div>`;
+        }
+
+        async function fWczytaj() {
+            ustawTytul("=== Fiszki – Sternik Motorowodny ===");
+            appDiv.innerHTML = `<h2 class="srodek">Wczytywanie pytań...</h2>`;
+
+            const ids = dostepneZestawy;
+            const wyniki = await Promise.allSettled(ids.map(id => getDoc(doc(db, "baza_pytan", id))));
+
+            const zebrane = [];
+            const niewczytane = [];
+            let pominiete = 0;
+
+            wyniki.forEach((r, k) => {
+                if (r.status !== "fulfilled" || !r.value.exists() || !Array.isArray(r.value.data().pytania)) {
+                    niewczytane.push(ids[k]);
+                    return;
+                }
+                r.value.data().pytania.forEach(p => {
+                    if (fPoprawnePytanie(p)) zebrane.push(p);
+                    else pominiete++;
+                });
+            });
+
+            if (!zebrane.length) {
+                fBlad("Nie udało się wczytać pytań" + (niewczytane.length ? " (" + niewczytane.join(", ") + ")" : "") + ". Sprawdź połączenie i spróbuj ponownie.");
+                return;
+            }
+
+            const czesci = [];
+            if (niewczytane.length) czesci.push("Nie wczytano: " + niewczytane.join(", "));
+            if (pominiete) czesci.push("Pominięto " + pominiete + " pytań bez zaznaczonej poprawnej odpowiedzi");
+            fUwagi = czesci.join(". ");
+
+            fPytania = zebrane;
+            fStartRunda(fPytania);
+        }
+
+        function fStartRunda(lista) {
+            const baza = shuffle(lista.slice());
+            fKolejka = baza.map(p => ({
+                p,
+                odp: shuffle(p.odp.map((tekst, i) => ({ tekst, idx: i })))
+            }));
+            fBledne = [];
+            fIndex = 0;
+            fDobre = 0;
+            fZle = 0;
+            fPokazPytanie();
+        }
+
+        function fPokazPytanie() {
+            if (fIndex >= fKolejka.length) {
+                fKoniec();
+                return;
+            }
+
+            const { p, odp } = fKolejka[fIndex];
+            fWybrana = null;
+            fZatwierdzone = false;
+
+            const proc = (fIndex / fKolejka.length) * 100;
+            const src = srcObrazka(p.obrazek);
+
+            appDiv.innerHTML = `
+                <div class="progress"><div class="progress-inner" style="width:${proc}%"></div></div>
+                <div class="pasek">
+                    <span>Pytanie ${fIndex + 1} z ${fKolejka.length}</span>
+                    <span><b class="ok" id="fLicznikDobre">✓ ${fDobre}</b> &nbsp; <b class="zle-txt" id="fLicznikZle">✗ ${fZle}</b></span>
+                </div>
+                ${fUwagi ? `<div class="komunikat">${esc(fUwagi)}</div>` : ""}
+                <h2 class="fade">${esc(p.tresc)}</h2>
+                ${src ? `<img class="question-img fade" src="${esc(src)}" alt="Rysunek pomocniczy"
+                    onerror="this.outerHTML='<p class=&quot;muted srodek&quot;>⚠ Nie udało się wczytać obrazka do tego pytania.</p>'">` : ""}
+                <div id="fOdpowiedzi">
+                    ${odp.map((o, k) => `
+                        <button class="odp fade" data-fidx="${o.idx}"><span class="nr">${k + 1}</span><span>${esc(o.tekst)}</span></button>
+                    `).join("")}
+                </div>
+                <div id="fFeedback" class="feedback" hidden></div>
+                <button id="fAkcja" data-fakcja="zatwierdz" disabled>Zatwierdź odpowiedź</button>
+                <button class="drugi" data-fakcja="menu">← Zakończ naukę i wróć do wyboru</button>
+            `;
+        }
+
+        function fWybierz(idx) {
+            if (fZatwierdzone) return;
+            fWybrana = idx;
+            document.querySelectorAll(".odp").forEach(b => {
+                b.classList.toggle("wybrana", Number(b.dataset.fidx) === idx);
+            });
+            $("fAkcja").disabled = false;
+        }
+
+        function fZatwierdz() {
+            if (fZatwierdzone || fWybrana === null) return;
+            fZatwierdzone = true;
+
+            const { p } = fKolejka[fIndex];
+            const dobrze = fWybrana === p.poprawna;
+
+            if (dobrze) {
+                fDobre++;
+            } else {
+                fZle++;
+                if (!fBledne.includes(p)) fBledne.push(p);
+            }
+
+            document.querySelectorAll(".odp").forEach(b => {
+                const i = Number(b.dataset.fidx);
+                b.classList.remove("wybrana");
+                b.classList.add("zablokowana");
+                if (i === p.poprawna) b.classList.add("dobra");
+                else if (i === fWybrana) b.classList.add("zla");
+            });
+
+            const fb = $("fFeedback");
+            fb.hidden = false;
+            fb.className = "feedback fade " + (dobrze ? "dobrze" : "zle");
+            fb.innerHTML = dobrze
+                ? "✓ Dobrze!"
+                : `✗ Źle. Poprawna odpowiedź: <b>${esc(p.odp[p.poprawna])}</b>`;
+
+            $("fLicznikDobre").textContent = "✓ " + fDobre;
+            $("fLicznikZle").textContent = "✗ " + fZle;
+
+            const a = $("fAkcja");
+            a.disabled = false;
+            a.dataset.fakcja = "dalej";
+            a.textContent = (fIndex + 1 >= fKolejka.length) ? "Zobacz wynik" : "Dalej →";
+        }
+
+        function fDalej() {
+            fIndex++;
+            fPokazPytanie();
+        }
+
+        function fKoniec() {
+            const razem = fKolejka.length;
+            const proc = Math.round((fDobre / razem) * 100);
+
+            appDiv.innerHTML = `
+                <div class="srodek fade">
+                    <h2>Runda zakończona</h2>
+                    <div class="wynik">${fDobre} / ${razem} (${proc}%)</div>
+                    <p class="muted">To tylko ćwiczenie – wynik nie został zapisany.</p>
+                    ${fBledne.length
+                        ? `<button data-fakcja="powtorz">🔁 Powtórz błędne (${fBledne.length})</button>`
+                        : `<p class="ok"><b>Wszystko poprawnie! 🎉</b></p>`}
+                    <button data-fakcja="odnowa">🔄 Zacznij od nowa (nowe wymieszanie)</button>
+                    <button class="drugi" data-fakcja="menu">← Wróć do wyboru</button>
+                </div>`;
+        }
+
+        // Obsługa przycisków fiszek (przyciski egzaminu mają własne onclick)
+        appDiv.addEventListener("click", e => {
+            const b = e.target.closest("button");
+            if (!b) return;
+
+            if (b.dataset.fidx !== undefined) {
+                fWybierz(Number(b.dataset.fidx));
+            } else if (b.dataset.fakcja === "zatwierdz") {
+                fZatwierdz();
+            } else if (b.dataset.fakcja === "dalej") {
+                fDalej();
+            } else if (b.dataset.fakcja === "powtorz") {
+                fStartRunda(fBledne.slice());
+            } else if (b.dataset.fakcja === "odnowa") {
+                fStartRunda(fPytania);
+            } else if (b.dataset.fakcja === "ponow") {
+                fWczytaj();
+            } else if (b.dataset.fakcja === "menu") {
+                start();
+            }
+        });
+
+        // Skróty w fiszkach: 1/2/3 wybiera odpowiedź, Enter zatwierdza lub przechodzi dalej
+        document.addEventListener("keydown", e => {
+            if (e.repeat || !$("fAkcja")) return;
+
+            if (/^[1-9]$/.test(e.key)) {
+                if (fZatwierdzone) return;
+                const btn = document.querySelectorAll(".odp")[Number(e.key) - 1];
+                if (btn) {
+                    e.preventDefault();
+                    fWybierz(Number(btn.dataset.fidx));
+                }
+            } else if (e.key === "Enter") {
+                e.preventDefault();
+                if (!fZatwierdzone) fZatwierdz();
+                else fDalej();
+            }
+        });
+
+        start();
     </script>
 </body>
 
