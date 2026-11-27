@@ -83,8 +83,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 
         window.start = function () {
             ustawTytul("Licencja na Holowanie");
-            document.body.style.height = "";
-            document.body.style.padding = "";
 
             appDiv.innerHTML = `
                 <div class="fade-in">
@@ -312,11 +310,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
                     <button class="drugi" onclick="start()" style="display:block; margin: 8px auto; max-width: 260px;">← Wróć do wyboru</button>
                 </div>
             `;
-
-            if (window.innerHeight < 800) {
-                document.body.style.height = "auto";
-                document.body.style.padding = "20px 0";
-            }
         }
 
         // ===========================================================

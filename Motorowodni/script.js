@@ -85,8 +85,6 @@ window.validateNick = function () {
 
 window.start = function () {
     ustawTytul("Sternik Motorowodny");
-    document.body.style.height = "";
-    document.body.style.padding = "";
 
     appDiv.innerHTML = `
                 <div class="fade-in">
@@ -314,11 +312,6 @@ function pokazPodsumowanie(bladZapisu) {
                     <button class="drugi" onclick="start()" style="display:block; margin: 8px auto; max-width: 260px;">← Wróć do wyboru</button>
                 </div>
             `;
-
-    if (window.innerHeight < 800) {
-        document.body.style.height = "auto";
-        document.body.style.padding = "20px 0";
-    }
 }
 
 // ===========================================================
